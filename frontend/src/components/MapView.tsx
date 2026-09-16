@@ -48,14 +48,15 @@ export const MapView: React.FC<MapViewProps> = ({
     if (data.features.length > 0) {
       const feat = data.features[data.features.length - 1];
       if (feat.geometry.type === 'Polygon' && feat.geometry.coordinates[0]) {
-        setDrawVertexCount(feat.geometry.coordinates[0].length - 1);
+        setDrawVertexCount(Math.max(0, feat.geometry.coordinates[0].length - 1));
       } else if (
         feat.geometry.type === 'LineString' &&
         feat.geometry.coordinates
       ) {
-        setDrawVertexCount(feat.geometry.coordinates.length);
-      } else if (feat.geometry.type === 'Point') {
-        setDrawVertexCount(1);
+        // Subtract 1 because MapboxDraw includes the moving cursor position as a coordinate
+        setDrawVertexCount(Math.max(0, feat.geometry.coordinates.length - 1));
+      } else {
+        setDrawVertexCount(0);
       }
     } else {
       setDrawVertexCount(0);
