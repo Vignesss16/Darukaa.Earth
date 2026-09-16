@@ -3,6 +3,7 @@ import { Sidebar } from './components/Sidebar';
 import { MapView } from './components/MapView';
 import { SiteDetailPanel } from './components/SiteDetailPanel';
 import { ProjectTable } from './components/ProjectTable';
+import { ActivityFeed } from './components/ActivityFeed';
 import { SiteFormModal } from './components/SiteFormModal';
 import { AuthModal } from './components/AuthModal';
 import {
@@ -23,7 +24,9 @@ import {
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
-  const [currentTab, setCurrentTab] = useState<'map' | 'projects'>('map');
+  const [currentTab, setCurrentTab] = useState<'map' | 'projects' | 'activity'>(
+    'map'
+  );
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
@@ -176,6 +179,7 @@ export const App: React.FC = () => {
               isDrawing={isDrawing}
               setIsDrawing={setIsDrawing}
               drawnGeoJSON={drawnGeoJSON}
+              userRole={currentUser?.role}
             />
 
             <SiteDetailPanel
@@ -186,7 +190,7 @@ export const App: React.FC = () => {
               userRole={currentUser?.role}
             />
           </div>
-        ) : (
+        ) : currentTab === 'projects' ? (
           <ProjectTable
             projects={projects}
             onCreateProject={handleCreateProject}
@@ -194,6 +198,8 @@ export const App: React.FC = () => {
             onSelectProjectOnMap={handleSelectProjectOnMap}
             userRole={currentUser?.role}
           />
+        ) : (
+          <ActivityFeed />
         )}
       </main>
 

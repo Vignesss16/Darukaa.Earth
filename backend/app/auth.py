@@ -124,6 +124,10 @@ def get_current_user(
             detail="User associated with token no longer exists",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    from app.services.audit import set_current_user_id
+
+    db.info["user_id"] = user.id
+    set_current_user_id(user.id)
     return user
 
 
@@ -133,7 +137,7 @@ def require_roles(allowed_roles: List[UserRole]):
     def role_checker(current_user: User = Depends(get_current_user)) -> User:
         if current_user.role not in allowed_roles:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Operation not permitted for role '{current_user.role.value}'",
             )
         return current_user

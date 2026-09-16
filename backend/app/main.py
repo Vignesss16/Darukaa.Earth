@@ -2,10 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routers import auth, projects, sites
+from app.routers import activity, auth, metrics, projects, sites
+from app.services.audit import register_audit_event_listeners
 
-# Ensure DB tables exist on startup
+# Ensure DB tables exist on startup and register audit listeners
 Base.metadata.create_all(bind=engine)
+register_audit_event_listeners()
 
 app = FastAPI(
     title="Darukaa.Earth Operations API",
@@ -16,6 +18,8 @@ This API powers the internal operations console for carbon and biodiversity site
 - **Authentication & RBAC**: JWT access/refresh token rotation, bcrypt password hashing, and Admin/Analyst/Viewer role enforcement.
 - **Projects**: Management of conservation project containers.
 - **Spatial Sites**: GeoJSON Polygon capture, PostGIS geometry indexing (GIST), and automated geodesic surface area calculations in hectares.
+- **Analytics & Degradation Alerts**: NDVI time-series satellite signals and automated consecutive reading change alert engine (>10% drop threshold).
+- **Audit Logging & Activity Feed**: System activity audit logs with plain-language activity summaries.
 """,
     version="0.1.0",
     docs_url="/docs",
@@ -41,6 +45,23 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(projects.router)
 app.include_router(sites.router)
+app.include_router(metrics.router)
+app.include_router(activity.router)
+
+
+@app.get(
+    "/",
+    summary="API Root",
+    description="Welcome to Darukaa.Earth Operations API.",
+)
+def root():
+    """API root endpoint providing status and documentation link."""
+    return {
+        "name": "Darukaa.Earth Operations API",
+        "status": "online",
+        "docs": "/docs",
+        "health": "/health",
+    }
 
 
 @app.get(

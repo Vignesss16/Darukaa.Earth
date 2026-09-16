@@ -1,10 +1,17 @@
 import React from 'react';
-import { Layers, Map, LogOut, Shield, User as UserIcon } from 'lucide-react';
+import {
+  Layers,
+  Map,
+  LogOut,
+  Shield,
+  User as UserIcon,
+  Activity,
+} from 'lucide-react';
 import { User } from '../types';
 
 interface SidebarProps {
-  currentTab: 'map' | 'projects';
-  onTabChange: (tab: 'map' | 'projects') => void;
+  currentTab: 'map' | 'projects' | 'activity';
+  onTabChange: (tab: 'map' | 'projects' | 'activity') => void;
   currentUser: User | null;
   onLogout: () => void;
 }
@@ -112,6 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   : 'var(--color-ink)',
               fontWeight: currentTab === 'projects' ? 600 : 400,
               cursor: 'pointer',
+              marginBottom: '4px',
               textAlign: 'left',
             }}
           >
@@ -124,6 +132,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }
             />
             Projects index
+          </button>
+
+          <button
+            onClick={() => onTabChange('activity')}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              border: 'none',
+              backgroundColor:
+                currentTab === 'activity'
+                  ? 'rgba(47, 82, 51, 0.08)'
+                  : 'transparent',
+              color:
+                currentTab === 'activity'
+                  ? 'var(--color-canopy)'
+                  : 'var(--color-ink)',
+              fontWeight: currentTab === 'activity' ? 600 : 400,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <Activity
+              size={18}
+              color={
+                currentTab === 'activity'
+                  ? 'var(--color-canopy)'
+                  : 'var(--color-ink)'
+              }
+            />
+            Activity feed
           </button>
         </nav>
       </div>

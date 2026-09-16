@@ -1,4 +1,13 @@
-import { GeoJSONPolygon, Project, Site, TokenResponse, User } from './types';
+import {
+  ActivityLogItem,
+  DegradationAlert,
+  GeoJSONPolygon,
+  Project,
+  Site,
+  SiteMetric,
+  TokenResponse,
+  User,
+} from './types';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -164,5 +173,28 @@ export const api = {
       request<void>(`/sites/${id}`, {
         method: 'DELETE',
       }),
+  },
+  metrics: {
+    get: (siteId: number, metricType?: string) =>
+      request<SiteMetric[]>(
+        `/sites/${siteId}/metrics${metricType ? `?metric_type=${metricType}` : ''}`
+      ),
+    seed: (siteId: number, includeSpike = false) =>
+      request<SiteMetric[]>(
+        `/sites/${siteId}/seed-metrics?include_spike=${includeSpike}`,
+        {
+          method: 'POST',
+        }
+      ),
+  },
+  alerts: {
+    list: (siteId?: number) =>
+      request<DegradationAlert[]>(
+        `/alerts${siteId ? `?site_id=${siteId}` : ''}`
+      ),
+  },
+  activity: {
+    list: (limit = 50) =>
+      request<ActivityLogItem[]>(`/activity?limit=${limit}`),
   },
 };

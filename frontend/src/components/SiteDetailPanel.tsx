@@ -1,6 +1,23 @@
-import React from 'react';
-import { Site, Project, UserRole } from '../types';
-import { X, Calendar, Trash2, Globe, Trees } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+  Site,
+  Project,
+  UserRole,
+  SiteMetric,
+  DegradationAlert,
+} from '../types';
+import { api } from '../api';
+import { SiteMetricsChart } from './SiteMetricsChart';
+import { AlertBanner } from './AlertBanner';
+import {
+  X,
+  Calendar,
+  Trash2,
+  Globe,
+  Trees,
+  LineChart,
+  RefreshCw,
+} from 'lucide-react';
 
 interface SiteDetailPanelProps {
   site: Site | null;
@@ -17,6 +34,46 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
   onDeleteSite,
   userRole,
 }) => {
+  const [metrics, setMetrics] = useState<SiteMetric[]>([]);
+  const [siteAlerts, setSiteAlerts] = useState<DegradationAlert[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [seeding, setSeeding] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (site?.id) {
+      loadSiteMetricsAndAlerts(site.id);
+    }
+  }, [site?.id]);
+
+  const loadSiteMetricsAndAlerts = async (siteId: number) => {
+    setLoading(true);
+    try {
+      const [fetchedMetrics, fetchedAlerts] = await Promise.all([
+        api.metrics.get(siteId),
+        api.alerts.list(siteId),
+      ]);
+      setMetrics(fetchedMetrics);
+      setSiteAlerts(fetchedAlerts);
+    } catch (err) {
+      console.error('Failed to load site metrics or alerts:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSeedMetrics = async (includeSpike: boolean) => {
+    if (!site) return;
+    setSeeding(true);
+    try {
+      await api.metrics.seed(site.id, includeSpike);
+      await loadSiteMetricsAndAlerts(site.id);
+    } catch (err) {
+      console.error('Failed to seed site metrics:', err);
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   if (!site) return null;
 
   const parentProject = projects.find((p) => p.id === site.project_id);
@@ -24,7 +81,6 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
   const getSiteTypeBadgeClass = (type: string) => {
     switch (type) {
       case 'carbon':
-        return 'badge-moss';
       case 'biodiversity':
         return 'badge-moss';
       default:
@@ -43,7 +99,8 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
         position: 'absolute',
         top: 0,
         right: 0,
-        width: '380px',
+        width: '100%',
+        maxWidth: '420px',
         height: '100%',
         backgroundColor: '#FFFFFF',
         borderLeft: '1px solid var(--color-line)',
@@ -104,15 +161,18 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
         </button>
       </div>
 
-      {/* Content */}
+      {/* Content Area */}
       <div style={{ padding: '20px', flex: 1, overflowY: 'auto' }}>
-        {/* Metric Cards */}
+        {/* Degradation Alerts (Feature B) */}
+        <AlertBanner alerts={siteAlerts} />
+
+        {/* Metric Overview Cards */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: '12px',
-            marginBottom: '24px',
+            marginBottom: '20px',
           }}
         >
           <div
@@ -130,7 +190,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                 marginBottom: '4px',
               }}
             >
-              Area size
+              Geodesic surface area
             </div>
             <div
               style={{
@@ -166,6 +226,87 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
               <Trees size={12} style={{ marginRight: '4px' }} />
               {site.site_type}
             </span>
+          </div>
+        </div>
+
+        {/* Time Series Chart (Chart.js + Feature A) */}
+        <div style={{ marginBottom: '24px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '10px',
+            }}
+          >
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <LineChart size={15} color="var(--color-canopy)" />
+              Vegetation health & canopy time-series
+            </div>
+
+            {(userRole === 'admin' || userRole === 'analyst') && (
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  onClick={() => handleSeedMetrics(false)}
+                  disabled={seeding}
+                  className="btn-secondary"
+                  style={{ fontSize: '10px', padding: '2px 6px' }}
+                  title="Seed 12-month normal seasonal data"
+                >
+                  <RefreshCw size={10} />
+                  {seeding ? 'Seeding...' : 'Seed data'}
+                </button>
+                <button
+                  onClick={() => handleSeedMetrics(true)}
+                  disabled={seeding}
+                  className="btn-secondary"
+                  style={{
+                    fontSize: '10px',
+                    padding: '2px 6px',
+                    color: 'var(--color-clay)',
+                  }}
+                  title="Inject >10% degradation drop to trigger alert logic"
+                >
+                  Simulate drop
+                </button>
+              </div>
+            )}
+          </div>
+
+          {loading ? (
+            <div
+              style={{
+                padding: '20px',
+                textAlign: 'center',
+                fontSize: '12px',
+                opacity: 0.6,
+              }}
+            >
+              Loading time series...
+            </div>
+          ) : (
+            <SiteMetricsChart metrics={metrics} />
+          )}
+
+          <div
+            style={{
+              fontSize: '10px',
+              color: 'var(--color-ink)',
+              opacity: 0.65,
+              marginTop: '8px',
+              fontStyle: 'italic',
+            }}
+          >
+            Feature A: Sentinel-2 NDVI satellite ingestion model (documented
+            placeholder in <code>services/metrics.py</code>).
           </div>
         </div>
 
@@ -245,11 +386,11 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
           </div>
         )}
 
-        {/* Admin Actions */}
+        {/* Admin Actions (Feature C RBAC Gating) */}
         {userRole === 'admin' && (
           <div
             style={{
-              marginTop: '32px',
+              marginTop: '24px',
               paddingTop: '16px',
               borderTop: '1px solid var(--color-line)',
             }}

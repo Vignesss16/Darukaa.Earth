@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { Site, GeoJSONPolygon } from '../types';
+import { Site, GeoJSONPolygon, UserRole } from '../types';
 import { Plus, Trash2, MapPin } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
@@ -15,6 +15,7 @@ interface MapViewProps {
   isDrawing: boolean;
   setIsDrawing: (drawing: boolean) => void;
   drawnGeoJSON: GeoJSONPolygon | null;
+  userRole?: UserRole;
 }
 
 export const MapView: React.FC<MapViewProps> = ({
@@ -26,6 +27,7 @@ export const MapView: React.FC<MapViewProps> = ({
   isDrawing,
   setIsDrawing,
   drawnGeoJSON,
+  userRole,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -318,47 +320,51 @@ export const MapView: React.FC<MapViewProps> = ({
           {sites.length} sites mapped
         </div>
 
-        <div
-          style={{
-            height: '16px',
-            width: '1px',
-            backgroundColor: 'var(--color-line)',
-          }}
-        />
+        {(userRole === 'admin' || userRole === 'analyst') && (
+          <>
+            <div
+              style={{
+                height: '16px',
+                width: '1px',
+                backgroundColor: 'var(--color-line)',
+              }}
+            />
 
-        <button
-          onClick={handleStartDraw}
-          className="btn-primary"
-          style={{ padding: '6px 12px', fontSize: '12px' }}
-        >
-          <Plus size={14} />
-          Draw site polygon
-        </button>
+            <button
+              onClick={handleStartDraw}
+              className="btn-primary"
+              style={{ padding: '6px 12px', fontSize: '12px' }}
+            >
+              <Plus size={14} />
+              Draw site polygon
+            </button>
 
-        {drawnGeoJSON && (
-          <button
-            onClick={onOpenSiteForm}
-            className="btn-primary"
-            style={{
-              backgroundColor: 'var(--color-moss)',
-              borderColor: 'var(--color-moss)',
-              padding: '6px 12px',
-              fontSize: '12px',
-            }}
-          >
-            Save drawn polygon
-          </button>
-        )}
+            {drawnGeoJSON && (
+              <button
+                onClick={onOpenSiteForm}
+                className="btn-primary"
+                style={{
+                  backgroundColor: 'var(--color-moss)',
+                  borderColor: 'var(--color-moss)',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                }}
+              >
+                Save drawn polygon
+              </button>
+            )}
 
-        {isDrawing && (
-          <button
-            onClick={handleClearDraw}
-            className="btn-secondary"
-            style={{ padding: '6px 10px', fontSize: '12px' }}
-          >
-            <Trash2 size={12} />
-            Cancel draw
-          </button>
+            {isDrawing && (
+              <button
+                onClick={handleClearDraw}
+                className="btn-secondary"
+                style={{ padding: '6px 10px', fontSize: '12px' }}
+              >
+                <Trash2 size={12} />
+                Cancel draw
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

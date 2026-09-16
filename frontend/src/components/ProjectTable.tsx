@@ -242,7 +242,8 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                     opacity: 0.6,
                   }}
                 >
-                  No conservation projects found matching filter criteria.
+                  No conservation projects found. Add a project to start
+                  tracking carbon reserves.
                 </td>
               </tr>
             ) : (
