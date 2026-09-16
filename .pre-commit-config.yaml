@@ -1,0 +1,19 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^backend/
+  - repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+      - id: black
+        files: ^backend/
+  - repo: local
+    hooks:
+      - id: frontend-lint-staged
+        name: Frontend lint-staged (Husky)
+        entry: cmd /c "cd frontend && npx lint-staged"
+        language: system
+        files: ^frontend/
