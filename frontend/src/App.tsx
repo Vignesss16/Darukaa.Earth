@@ -107,17 +107,32 @@ export const App: React.FC = () => {
   };
 
   const handleSaveSite = async (
-    projectId: number,
+    projectId: number | null,
+    newProjectName: string | null,
     name: string,
     siteType: SiteType,
     geojson: GeoJSONPolygon
   ) => {
+    let targetProjectId = projectId;
+    if (!targetProjectId && newProjectName) {
+      const newProj = await api.projects.create({
+        name: newProjectName,
+        description: 'Conservation project created via site boundary mapping',
+      });
+      targetProjectId = newProj.id;
+    }
+
+    if (!targetProjectId) {
+      throw new Error('Please select or enter a valid parent project.');
+    }
+
     const newSite = await api.sites.create({
-      project_id: projectId,
+      project_id: targetProjectId,
       name,
       site_type: siteType,
       geojson,
     });
+
     setSites([newSite, ...sites]);
     setSelectedSite(newSite);
     setDrawnGeoJSON(null);
@@ -173,7 +188,15 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflow: 'hidden',
+        }}
+      >
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -201,7 +224,9 @@ export const App: React.FC = () => {
               searchQuery={searchQuery}
             />
           ) : currentTab === 'map' ? (
-            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+            <div
+              style={{ width: '100%', height: '100%', position: 'relative' }}
+            >
               <MapView
                 sites={sites}
                 selectedSite={selectedSite}

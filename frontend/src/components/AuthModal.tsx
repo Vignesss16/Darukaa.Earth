@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserRole } from '../types';
-import { Key, Mail, User as UserIcon } from 'lucide-react';
+import { Key, Mail, User as UserIcon, Globe } from 'lucide-react';
 
 interface AuthModalProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -74,8 +74,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(28, 43, 34, 0.65)',
-        backdropFilter: 'blur(3px)',
+        backgroundColor: 'rgba(19, 27, 46, 0.45)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -83,31 +83,51 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }}
     >
       <div
+        className="card-container"
         style={{
           backgroundColor: '#FFFFFF',
-          border: '1px solid var(--color-line)',
-          width: '420px',
-          padding: '32px 28px',
-          boxShadow: '0 8px 32px rgba(28, 43, 34, 0.16)',
+          border: '1px solid #e0e3e5',
+          borderRadius: '12px',
+          width: '400px',
+          padding: '28px 24px',
+          boxShadow:
+            '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div
-            className="heading-serif"
             style={{
-              fontSize: '24px',
-              color: 'var(--color-canopy)',
-              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '4px',
             }}
           >
-            Darukaa.Earth
+            <div
+              style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '4px',
+                backgroundColor: '#131b2e',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF',
+              }}
+            >
+              <Globe size={14} />
+            </div>
+            <span
+              style={{ fontSize: '18px', fontWeight: 700, color: '#191c1e' }}
+            >
+              Darukaa.Earth
+            </span>
           </div>
           <p
             style={{
               fontSize: '12px',
-              color: 'var(--color-ink)',
-              opacity: 0.7,
-              marginTop: '4px',
+              color: '#45464d',
+              marginTop: '2px',
             }}
           >
             {isRegister
@@ -119,11 +139,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {errorMsg && (
           <div
             style={{
-              padding: '10px 12px',
-              backgroundColor: 'rgba(181, 86, 60, 0.1)',
-              border: '1px solid var(--color-clay)',
-              color: 'var(--color-clay)',
+              padding: '8px 12px',
+              backgroundColor: '#ffdad6',
+              border: '1px solid rgba(186, 26, 26, 0.3)',
+              color: '#93000a',
               fontSize: '12px',
+              borderRadius: '6px',
               marginBottom: '16px',
             }}
           >
@@ -140,18 +161,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   fontSize: '12px',
                   fontWeight: 500,
                   marginBottom: '4px',
+                  color: '#191c1e',
                 }}
               >
                 Full name
               </label>
-              <div style={{ position: 'relative' }}>
+              <div
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
                 <UserIcon
-                  size={16}
+                  size={15}
+                  color="#76777d"
                   style={{
                     position: 'absolute',
                     left: '10px',
-                    top: '10px',
-                    opacity: 0.5,
+                    pointerEvents: 'none',
                   }}
                 />
                 <input
@@ -161,7 +189,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="input-field"
-                  style={{ paddingLeft: '32px' }}
+                  style={{
+                    paddingLeft: '32px',
+                    height: '34px',
+                    borderColor: '#e0e3e5',
+                  }}
                 />
               </div>
             </div>
@@ -174,18 +206,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 fontSize: '12px',
                 fontWeight: 500,
                 marginBottom: '4px',
+                color: '#191c1e',
               }}
             >
               Email address
             </label>
-            <div style={{ position: 'relative' }}>
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
               <Mail
-                size={16}
+                size={15}
+                color="#76777d"
                 style={{
                   position: 'absolute',
                   left: '10px',
-                  top: '10px',
-                  opacity: 0.5,
+                  pointerEvents: 'none',
                 }}
               />
               <input
@@ -195,7 +234,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input-field"
-                style={{ paddingLeft: '32px' }}
+                style={{
+                  paddingLeft: '32px',
+                  height: '34px',
+                  borderColor: '#e0e3e5',
+                }}
               />
             </div>
           </div>
@@ -207,18 +250,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 fontSize: '12px',
                 fontWeight: 500,
                 marginBottom: '4px',
+                color: '#191c1e',
               }}
             >
               Password
             </label>
-            <div style={{ position: 'relative' }}>
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
               <Key
-                size={16}
+                size={15}
+                color="#76777d"
                 style={{
                   position: 'absolute',
                   left: '10px',
-                  top: '10px',
-                  opacity: 0.5,
+                  pointerEvents: 'none',
                 }}
               />
               <input
@@ -228,19 +278,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-field"
-                style={{ paddingLeft: '32px' }}
+                style={{
+                  paddingLeft: '32px',
+                  height: '34px',
+                  borderColor: '#e0e3e5',
+                }}
               />
             </div>
           </div>
 
           {isRegister && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '18px' }}>
               <label
                 style={{
                   display: 'block',
                   fontSize: '12px',
                   fontWeight: 500,
                   marginBottom: '4px',
+                  color: '#191c1e',
                 }}
               >
                 System role enum
@@ -251,6 +306,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setRole(e.target.value as UserRole)
                 }
                 className="input-field"
+                style={{ height: '34px', borderColor: '#e0e3e5' }}
               >
                 <option value="admin">Admin (full CRUD & deletion)</option>
                 <option value="analyst">Analyst (create & edit sites)</option>
@@ -266,7 +322,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             style={{
               width: '100%',
               justifyContent: 'center',
-              padding: '10px',
+              height: '34px',
+              fontSize: '13px',
+              fontWeight: 600,
+              backgroundColor: '#131b2e',
+              borderColor: '#131b2e',
               marginBottom: '16px',
             }}
           >
@@ -282,15 +342,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div
           style={{
             paddingTop: '16px',
-            borderTop: '1px solid var(--color-line)',
+            borderTop: '1px solid #e0e3e5',
             textAlign: 'center',
           }}
         >
           <div
             style={{
               fontSize: '11px',
-              color: 'var(--color-ink)',
-              opacity: 0.6,
+              color: '#76777d',
               marginBottom: '8px',
             }}
           >
@@ -303,7 +362,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               onClick={() => setPresetCredentials('admin')}
               className="btn-secondary"
-              style={{ fontSize: '11px', padding: '3px 8px' }}
+              style={{ fontSize: '11px', padding: '0 8px', height: '26px' }}
             >
               Admin
             </button>
@@ -311,7 +370,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               onClick={() => setPresetCredentials('analyst')}
               className="btn-secondary"
-              style={{ fontSize: '11px', padding: '3px 8px' }}
+              style={{ fontSize: '11px', padding: '0 8px', height: '26px' }}
             >
               Analyst
             </button>
@@ -319,7 +378,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               onClick={() => setPresetCredentials('viewer')}
               className="btn-secondary"
-              style={{ fontSize: '11px', padding: '3px 8px' }}
+              style={{ fontSize: '11px', padding: '0 8px', height: '26px' }}
             >
               Viewer
             </button>
@@ -334,10 +393,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--color-canopy)',
+              color: '#006a61',
               fontSize: '12px',
               marginTop: '14px',
               cursor: 'pointer',
+              fontWeight: 500,
               textDecoration: 'underline',
             }}
           >

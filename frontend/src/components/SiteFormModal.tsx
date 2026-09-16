@@ -6,7 +6,8 @@ interface SiteFormModalProps {
   projects: Project[];
   drawnGeoJSON: GeoJSONPolygon | null;
   onSaveSite: (
-    projectId: number,
+    projectId: number | null,
+    newProjectName: string | null,
     name: string,
     siteType: SiteType,
     geojson: GeoJSONPolygon
@@ -20,7 +21,13 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
   onSaveSite,
   onClose,
 }) => {
+  const [isNewProject, setIsNewProject] = useState<boolean>(
+    projects.length === 0
+  );
   const [projectId, setProjectId] = useState<number>(projects[0]?.id || 0);
+  const [newProjectName, setNewProjectName] = useState<string>(
+    'Default Conservation Project'
+  );
   const [name, setName] = useState('');
   const [siteType, setSiteType] = useState<SiteType>('mixed');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +44,11 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
       setErrorMsg('Site name is required.');
       return;
     }
-    if (!projectId) {
+    if (isNewProject && !newProjectName.trim()) {
+      setErrorMsg('New project name is required.');
+      return;
+    }
+    if (!isNewProject && !projectId) {
       setErrorMsg('Please select a parent project.');
       return;
     }
@@ -49,7 +60,13 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
     try {
       setIsSubmitting(true);
       setErrorMsg('');
-      await onSaveSite(projectId, name.trim(), siteType, drawnGeoJSON);
+      await onSaveSite(
+        isNewProject ? null : projectId,
+        isNewProject ? newProjectName.trim() : null,
+        name.trim(),
+        siteType,
+        drawnGeoJSON
+      );
       onClose();
     } catch (err: unknown) {
       setErrorMsg(
@@ -76,11 +93,12 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
       }}
     >
       <div
+        className="card-container"
         style={{
           backgroundColor: '#FFFFFF',
-          border: '1px solid var(--color-line)',
           width: '460px',
           padding: '24px',
+          borderRadius: '12px',
         }}
       >
         <div
@@ -112,6 +130,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
               display: 'flex',
               alignItems: 'flex-start',
               gap: '8px',
+              borderRadius: '6px',
             }}
           >
             <AlertTriangle
@@ -124,34 +143,68 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '14px' }}>
-            <label
+            <div
               style={{
-                display: 'block',
-                fontSize: '12px',
-                fontWeight: 500,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 marginBottom: '4px',
               }}
             >
-              Parent project
-            </label>
-            <select
-              value={projectId}
-              onChange={(e) => setProjectId(Number(e.target.value))}
-              className="input-field"
-              required
-            >
-              {projects.length === 0 ? (
-                <option value={0}>
-                  No projects available - create a project first
-                </option>
-              ) : (
-                projects.map((p) => (
+              <label
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 500,
+                }}
+              >
+                Parent project
+              </label>
+              {projects.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setIsNewProject(!isNewProject)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-secondary)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '2px',
+                  }}
+                >
+                  {isNewProject
+                    ? 'Select existing project'
+                    : '+ Create new project'}
+                </button>
+              )}
+            </div>
+
+            {isNewProject ? (
+              <input
+                type="text"
+                required
+                placeholder="e.g. Amazon Carbon Reserve"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                className="input-field"
+              />
+            ) : (
+              <select
+                value={projectId}
+                onChange={(e) => setProjectId(Number(e.target.value))}
+                className="input-field"
+                required
+              >
+                {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
-                ))
-              )}
-            </select>
+                ))}
+              </select>
+            )}
           </div>
 
           <div style={{ marginBottom: '14px' }}>
@@ -207,6 +260,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
               padding: '12px',
               backgroundColor: 'var(--color-bg)',
               border: '1px solid var(--color-line)',
+              borderRadius: '6px',
               fontSize: '12px',
               marginBottom: '20px',
             }}
@@ -236,7 +290,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !drawnGeoJSON || projects.length === 0}
+              disabled={isSubmitting || !drawnGeoJSON}
               className="btn-primary"
             >
               {isSubmitting ? 'Validating & saving...' : 'Save site'}

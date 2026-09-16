@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app.routers import activity, auth, metrics, projects, sites
+from app.seed import seed_initial_data
 from app.services.audit import register_audit_event_listeners
 
-# Ensure DB tables exist on startup and register audit listeners
+# Ensure DB tables exist on startup, seed default data, and register audit listeners
 Base.metadata.create_all(bind=engine)
+seed_initial_data()
 register_audit_event_listeners()
 
 app = FastAPI(

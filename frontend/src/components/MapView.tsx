@@ -33,8 +33,13 @@ export const MapView: React.FC<MapViewProps> = ({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
 
-  const [mouseCoords, setMouseCoords] = useState<{ lng: number; lat: number } | null>(null);
-  const [mapStyle, setMapStyle] = useState<'light' | 'satellite' | 'outdoors'>('light');
+  const [mouseCoords, setMouseCoords] = useState<{
+    lng: number;
+    lat: number;
+  } | null>(null);
+  const [mapStyle, setMapStyle] = useState<'light' | 'satellite' | 'outdoors'>(
+    'light'
+  );
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -45,16 +50,18 @@ export const MapView: React.FC<MapViewProps> = ({
 
     const styleUrl = MAPBOX_TOKEN
       ? mapStyle === 'satellite'
-        ? 'mapbox://styles/mapbox/satellite-v9'
+        ? 'mapbox://styles/mapbox/satellite-streets-v12'
         : mapStyle === 'outdoors'
-        ? 'mapbox://styles/mapbox/outdoors-v12'
-        : 'mapbox://styles/mapbox/light-v11'
+          ? 'mapbox://styles/mapbox/outdoors-v12'
+          : 'mapbox://styles/mapbox/light-v11'
       : {
           version: 8,
           sources: {
             'carto-light': {
               type: 'raster',
-              tiles: ['https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png'],
+              tiles: [
+                'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
+              ],
               tileSize: 256,
               attribution: '&copy; OpenStreetMap, &copy; CARTO',
             },
@@ -89,7 +96,11 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-polygon-fill-inactive',
           type: 'fill',
-          filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon']],
+          filter: [
+            'all',
+            ['==', 'active', 'false'],
+            ['==', '$type', 'Polygon'],
+          ],
           paint: {
             'fill-color': '#0D9488',
             'fill-opacity': 0.25,
@@ -98,7 +109,11 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-polygon-stroke-inactive',
           type: 'line',
-          filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon']],
+          filter: [
+            'all',
+            ['==', 'active', 'false'],
+            ['==', '$type', 'Polygon'],
+          ],
           paint: {
             'line-color': '#0D9488',
             'line-width': 2,
@@ -261,7 +276,11 @@ export const MapView: React.FC<MapViewProps> = ({
     const map = mapRef.current;
     if (!map || sites.length === 0) return;
 
-    if (selectedSite && selectedSite.geojson && selectedSite.geojson.coordinates) {
+    if (
+      selectedSite &&
+      selectedSite.geojson &&
+      selectedSite.geojson.coordinates
+    ) {
       const coords = selectedSite.geojson.coordinates[0];
       const bounds = coords.reduce(
         (b, coord) => b.extend(coord as [number, number]),
@@ -334,14 +353,18 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setMapStyle('satellite')}
-              className={mapStyle === 'satellite' ? 'btn-primary' : 'btn-secondary'}
+              className={
+                mapStyle === 'satellite' ? 'btn-primary' : 'btn-secondary'
+              }
               style={{ height: '24px', fontSize: '11px', padding: '0 8px' }}
             >
               Satellite
             </button>
             <button
               onClick={() => setMapStyle('outdoors')}
-              className={mapStyle === 'outdoors' ? 'btn-primary' : 'btn-secondary'}
+              className={
+                mapStyle === 'outdoors' ? 'btn-primary' : 'btn-secondary'
+              }
               style={{ height: '24px', fontSize: '11px', padding: '0 8px' }}
             >
               Outdoors
@@ -420,7 +443,9 @@ export const MapView: React.FC<MapViewProps> = ({
           <Navigation size={11} color="var(--color-teal)" />
           <span>CURSOR:</span>
           <span style={{ color: 'var(--color-ink)', fontWeight: 600 }}>
-            {mouseCoords ? `${mouseCoords.lat}° N, ${mouseCoords.lng}° E` : 'Hover map...'}
+            {mouseCoords
+              ? `${mouseCoords.lat}° N, ${mouseCoords.lng}° E`
+              : 'Hover map...'}
           </span>
         </div>
         <span style={{ opacity: 0.4 }}>|</span>
@@ -429,4 +454,3 @@ export const MapView: React.FC<MapViewProps> = ({
     </div>
   );
 };
-
