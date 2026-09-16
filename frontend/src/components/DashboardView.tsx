@@ -98,7 +98,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }}
       >
         {/* Metric 1: Total Hectares */}
-        <div className="card-container" style={{ padding: '16px' }}>
+        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
           <div
             style={{
               display: 'flex',
@@ -138,7 +138,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Metric 2: Active Conservation Sites */}
-        <div className="card-container" style={{ padding: '16px' }}>
+        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
           <div
             style={{
               display: 'flex',
@@ -176,7 +176,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Metric 3: Avg Canopy Health */}
-        <div className="card-container" style={{ padding: '16px' }}>
+        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
           <div
             style={{
               display: 'flex',
@@ -214,7 +214,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Metric 4: Degradation Alerts */}
-        <div className="card-container" style={{ padding: '16px' }}>
+        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
           <div
             style={{
               display: 'flex',
