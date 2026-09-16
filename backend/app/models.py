@@ -8,7 +8,6 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
-    Index,
     Integer,
     Numeric,
     String,
@@ -90,10 +89,6 @@ class Site(Base):
     metrics = relationship(
         "SiteMetric", back_populates="site", cascade="all, delete-orphan"
     )
-
-
-# Explicit GIST index declaration on sites.geom for clarity and migrations
-Index("idx_sites_geom", Site.geom, postgresql_using="gist")
 
 
 class SiteMetric(Base):

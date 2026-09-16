@@ -1,0 +1,151 @@
+/* Darukaa.Earth Design System & Design Tokens */
+:root {
+  --color-bg: #f7f6f2;
+  --color-ink: #1c2b22;
+  --color-canopy: #2f5233;
+  --color-moss: #7a9b76;
+  --color-clay: #b5563c;
+  --color-line: #d8d3c4;
+
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --radius-control: 6px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+.heading-serif {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+  text-transform: none; /* Sentence case throughout */
+}
+
+/* Base button and input styling with strict border-radius: 6px */
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+  font-size: 13px;
+  border-radius: var(--radius-control);
+}
+
+.btn-primary {
+  background-color: var(--color-canopy);
+  color: #ffffff;
+  border: 1px solid var(--color-canopy);
+  padding: 8px 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.92;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  padding: 8px 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(216, 211, 196, 0.25);
+}
+
+.btn-danger {
+  background-color: var(--color-clay);
+  color: #ffffff;
+  border: 1px solid var(--color-clay);
+  padding: 8px 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.input-field {
+  width: 100%;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--color-canopy);
+}
+
+/* Badge indicators */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-control);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge-moss {
+  background-color: rgba(122, 155, 118, 0.2);
+  color: var(--color-canopy);
+  border: 1px solid var(--color-moss);
+}
+
+.badge-clay {
+  background-color: rgba(181, 86, 60, 0.15);
+  color: var(--color-clay);
+  border: 1px solid var(--color-clay);
+}
+
+.badge-neutral {
+  background-color: rgba(216, 211, 196, 0.3);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+}
