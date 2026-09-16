@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GeoJSONPolygon, Project, SiteType } from '../types';
-import { MapPin, AlertTriangle } from 'lucide-react';
+import { MapPin, AlertTriangle, Upload, CheckCircle2 } from 'lucide-react';
 
 interface SiteFormModalProps {
   projects: Project[];
@@ -17,7 +17,7 @@ interface SiteFormModalProps {
 
 export const SiteFormModal: React.FC<SiteFormModalProps> = ({
   projects,
-  drawnGeoJSON,
+  drawnGeoJSON: initialDrawnGeoJSON,
   onSaveSite,
   onClose,
 }) => {
@@ -30,6 +30,10 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
   );
   const [name, setName] = useState('');
   const [siteType, setSiteType] = useState<SiteType>('mixed');
+  const [drawnGeoJSON, setDrawnGeoJSON] = useState<GeoJSONPolygon | null>(
+    initialDrawnGeoJSON
+  );
+  const [importedFileName, setImportedFileName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -37,6 +41,82 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
     drawnGeoJSON && drawnGeoJSON.coordinates && drawnGeoJSON.coordinates[0]
       ? drawnGeoJSON.coordinates[0].length
       : 0;
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = JSON.parse(text);
+
+        let rawGeom: {
+          type: string;
+          coordinates: number[][][] | number[][][][];
+        } | null = null;
+        let suggestedName = '';
+
+        if (
+          parsed.type === 'FeatureCollection' &&
+          parsed.features?.length > 0
+        ) {
+          const feat = parsed.features[0];
+          rawGeom = feat.geometry;
+          suggestedName = feat.properties?.name || feat.properties?.title || '';
+        } else if (parsed.type === 'Feature') {
+          rawGeom = parsed.geometry;
+          suggestedName =
+            parsed.properties?.name || parsed.properties?.title || '';
+        } else if (
+          parsed.type === 'Polygon' ||
+          parsed.type === 'MultiPolygon'
+        ) {
+          rawGeom = parsed;
+        }
+
+        if (
+          !rawGeom ||
+          (rawGeom.type !== 'Polygon' && rawGeom.type !== 'MultiPolygon')
+        ) {
+          throw new Error(
+            'Uploaded file does not contain a valid GeoJSON Polygon.'
+          );
+        }
+
+        let finalPolygon: GeoJSONPolygon;
+        if (
+          rawGeom.type === 'MultiPolygon' &&
+          rawGeom.coordinates?.length > 0
+        ) {
+          finalPolygon = {
+            type: 'Polygon',
+            coordinates: rawGeom.coordinates[0],
+          };
+        } else {
+          finalPolygon = {
+            type: 'Polygon',
+            coordinates: rawGeom.coordinates,
+          };
+        }
+
+        setDrawnGeoJSON(finalPolygon);
+        setImportedFileName(file.name);
+        if (suggestedName && !name) {
+          setName(suggestedName);
+        }
+        setErrorMsg('');
+      } catch (err: unknown) {
+        setErrorMsg(
+          err instanceof Error
+            ? err.message
+            : 'Invalid GeoJSON file format. Please upload a valid .geojson or .json file.'
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +133,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
       return;
     }
     if (!drawnGeoJSON) {
-      setErrorMsg('No polygon boundary has been drawn on the map.');
+      setErrorMsg('No polygon boundary has been drawn or imported.');
       return;
     }
 
@@ -114,7 +194,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
             className="heading-serif"
             style={{ fontSize: '18px', color: 'var(--color-ink)' }}
           >
-            Save drawn site polygon
+            Save site boundary polygon
           </h2>
         </div>
 
@@ -254,7 +334,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
             </select>
           </div>
 
-          {/* GeoJSON Boundary Info Box */}
+          {/* GeoJSON Boundary Info & Import Box */}
           <div
             style={{
               padding: '12px',
@@ -265,18 +345,58 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
               marginBottom: '20px',
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-              Boundary geometry status
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '6px',
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>Boundary geometry status</div>
+              <label
+                style={{
+                  cursor: 'pointer',
+                  color: 'var(--color-teal)',
+                  fontWeight: 600,
+                  fontSize: '11px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <Upload size={12} />
+                <span>Import .geojson</span>
+                <input
+                  type="file"
+                  accept=".json,.geojson"
+                  onChange={handleFileUpload}
+                  style={{ display: 'none' }}
+                />
+              </label>
             </div>
-            <div style={{ color: 'var(--color-ink)', opacity: 0.8 }}>
+            <div style={{ color: 'var(--color-ink)', opacity: 0.85 }}>
               {drawnGeoJSON ? (
-                <span>
-                  GeoJSON Polygon captured with {vertexCount} coordinate
-                  vertices
-                </span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: 'var(--color-emerald)',
+                  }}
+                >
+                  <CheckCircle2 size={14} />
+                  <span>
+                    GeoJSON Polygon active ({vertexCount} vertices)
+                    {importedFileName
+                      ? ` — imported from ${importedFileName}`
+                      : ''}
+                  </span>
+                </div>
               ) : (
                 <span style={{ color: 'var(--color-clay)' }}>
-                  No polygon drawn on map yet
+                  No boundary captured yet. Draw on map or click 'Import
+                  .geojson'.
                 </span>
               )}
             </div>

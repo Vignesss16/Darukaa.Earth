@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Info,
   History,
+  Printer,
 } from 'lucide-react';
 
 interface SiteDetailPanelProps {
@@ -36,7 +37,9 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
   onDeleteSite,
   userRole,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'history'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'analytics' | 'history'
+  >('overview');
   const [metrics, setMetrics] = useState<SiteMetric[]>([]);
   const [siteAlerts, setSiteAlerts] = useState<DegradationAlert[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -77,6 +80,10 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
     }
   };
 
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   if (!site) return null;
 
   const parentProject = projects.find((p) => p.id === site.project_id);
@@ -94,11 +101,12 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
 
   const coords = site.geojson?.coordinates?.[0] || [];
   const vertexCount = coords.length;
-  const centroidLat = coords.length > 0 ? (coords[0][1]).toFixed(4) : '11.2700';
-  const centroidLng = coords.length > 0 ? (coords[0][0]).toFixed(4) : '75.8200';
+  const centroidLat = coords.length > 0 ? coords[0][1].toFixed(4) : '11.2700';
+  const centroidLng = coords.length > 0 ? coords[0][0].toFixed(4) : '75.8200';
 
   return (
     <div
+      className="printable-site-panel"
       style={{
         position: 'absolute',
         top: 0,
@@ -124,45 +132,102 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
           backgroundColor: '#FAFAFA',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            marginBottom: '8px',
+          }}
+        >
           <div>
-            <span className={`badge ${getSiteTypeBadgeClass(site.site_type)}`} style={{ marginBottom: '6px' }}>
+            <span
+              className={`badge ${getSiteTypeBadgeClass(site.site_type)}`}
+              style={{ marginBottom: '6px' }}
+            >
               <Trees size={11} /> {site.site_type}
             </span>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-ink)' }}>{site.name}</h2>
+            <h2
+              style={{
+                fontSize: '18px',
+                fontWeight: 700,
+                color: 'var(--color-ink)',
+              }}
+            >
+              {site.name}
+            </h2>
             {parentProject && (
-              <div style={{ fontSize: '12px', color: 'var(--color-ink-muted)', marginTop: '2px' }}>
-                Project Container: <span style={{ fontWeight: 600, color: 'var(--color-ink)' }}>{parentProject.name}</span>
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: 'var(--color-ink-muted)',
+                  marginTop: '2px',
+                }}
+              >
+                Project Container:{' '}
+                <span style={{ fontWeight: 600, color: 'var(--color-ink)' }}>
+                  {parentProject.name}
+                </span>
               </div>
             )}
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              color: 'var(--color-ink-muted)',
-              borderRadius: '4px',
-            }}
-            title="Close inspector panel"
-          >
-            <X size={18} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              onClick={handleExportPDF}
+              className="btn-secondary"
+              style={{
+                height: '28px',
+                fontSize: '11px',
+                padding: '0 8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+              title="Export executive PDF site report"
+            >
+              <Printer size={13} /> PDF Report
+            </button>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                color: 'var(--color-ink-muted)',
+                borderRadius: '4px',
+              }}
+              title="Close inspector panel"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Panel Inspector Navigation Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-line)', gap: '16px', marginTop: '12px' }}>
+        <div
+          style={{
+            display: 'flex',
+            borderBottom: '1px solid var(--color-line)',
+            gap: '16px',
+            marginTop: '12px',
+          }}
+        >
           <button
             onClick={() => setActiveTab('overview')}
             style={{
               padding: '6px 0',
               border: 'none',
-              borderBottom: activeTab === 'overview' ? '2px solid var(--color-ink)' : '2px solid transparent',
+              borderBottom:
+                activeTab === 'overview'
+                  ? '2px solid var(--color-ink)'
+                  : '2px solid transparent',
               backgroundColor: 'transparent',
               fontWeight: activeTab === 'overview' ? 600 : 400,
-              color: activeTab === 'overview' ? 'var(--color-ink)' : 'var(--color-ink-muted)',
+              color:
+                activeTab === 'overview'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)',
               fontSize: '12px',
               cursor: 'pointer',
               display: 'flex',
@@ -177,10 +242,16 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
             style={{
               padding: '6px 0',
               border: 'none',
-              borderBottom: activeTab === 'analytics' ? '2px solid var(--color-ink)' : '2px solid transparent',
+              borderBottom:
+                activeTab === 'analytics'
+                  ? '2px solid var(--color-ink)'
+                  : '2px solid transparent',
               backgroundColor: 'transparent',
               fontWeight: activeTab === 'analytics' ? 600 : 400,
-              color: activeTab === 'analytics' ? 'var(--color-ink)' : 'var(--color-ink-muted)',
+              color:
+                activeTab === 'analytics'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)',
               fontSize: '12px',
               cursor: 'pointer',
               display: 'flex',
@@ -195,10 +266,16 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
             style={{
               padding: '6px 0',
               border: 'none',
-              borderBottom: activeTab === 'history' ? '2px solid var(--color-ink)' : '2px solid transparent',
+              borderBottom:
+                activeTab === 'history'
+                  ? '2px solid var(--color-ink)'
+                  : '2px solid transparent',
               backgroundColor: 'transparent',
               fontWeight: activeTab === 'history' ? 600 : 400,
-              color: activeTab === 'history' ? 'var(--color-ink)' : 'var(--color-ink-muted)',
+              color:
+                activeTab === 'history'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)',
               fontSize: '12px',
               cursor: 'pointer',
               display: 'flex',
@@ -219,50 +296,144 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
         {activeTab === 'overview' && (
           <div>
             {/* Metric Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                marginBottom: '20px',
+              }}
+            >
               <div className="card-container" style={{ padding: '12px' }}>
-                <div style={{ fontSize: '10px', color: 'var(--color-ink-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--color-ink-muted)',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Surface Area
                 </div>
-                <div className="font-mono" style={{ fontSize: '20px', fontWeight: 600, color: 'var(--color-ink)', marginTop: '4px' }}>
-                  {site.area_hectares != null ? `${site.area_hectares} ha` : 'Calc...'}
+                <div
+                  className="font-mono"
+                  style={{
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    color: 'var(--color-ink)',
+                    marginTop: '4px',
+                  }}
+                >
+                  {site.area_hectares != null
+                    ? `${site.area_hectares} ha`
+                    : 'Calc...'}
                 </div>
               </div>
 
               <div className="card-container" style={{ padding: '12px' }}>
-                <div style={{ fontSize: '10px', color: 'var(--color-ink-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--color-ink-muted)',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Centroid Lat/Lng
                 </div>
-                <div className="font-mono" style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-ink)', marginTop: '6px' }}>
+                <div
+                  className="font-mono"
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'var(--color-ink)',
+                    marginTop: '6px',
+                  }}
+                >
                   {centroidLat}° N, {centroidLng}° E
                 </div>
               </div>
             </div>
 
             {/* Geometry Info */}
-            <div className="card-container" style={{ padding: '14px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-ink)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Globe size={15} color="var(--color-teal)" /> Spatial Polygon Metadata
+            <div
+              className="card-container"
+              style={{ padding: '14px', marginBottom: '20px' }}
+            >
+              <div
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--color-ink)',
+                  marginBottom: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <Globe size={15} color="var(--color-teal)" /> Spatial Polygon
+                Metadata
               </div>
               <div style={{ fontSize: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--color-line)' }}>
-                  <span style={{ color: 'var(--color-ink-muted)' }}>Geometry Type</span>
-                  <span className="font-mono" style={{ fontWeight: 500 }}>GeoJSON Polygon</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '6px 0',
+                    borderBottom: '1px solid var(--color-line)',
+                  }}
+                >
+                  <span style={{ color: 'var(--color-ink-muted)' }}>
+                    Geometry Type
+                  </span>
+                  <span className="font-mono" style={{ fontWeight: 500 }}>
+                    GeoJSON Polygon
+                  </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--color-line)' }}>
-                  <span style={{ color: 'var(--color-ink-muted)' }}>SRID Reference</span>
-                  <span className="font-mono" style={{ fontWeight: 500 }}>EPSG:4326 (WGS84)</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '6px 0',
+                    borderBottom: '1px solid var(--color-line)',
+                  }}
+                >
+                  <span style={{ color: 'var(--color-ink-muted)' }}>
+                    SRID Reference
+                  </span>
+                  <span className="font-mono" style={{ fontWeight: 500 }}>
+                    EPSG:4326 (WGS84)
+                  </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
-                  <span style={{ color: 'var(--color-ink-muted)' }}>Boundary Vertex Count</span>
-                  <span className="font-mono" style={{ fontWeight: 500 }}>{vertexCount} vertices</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '6px 0',
+                  }}
+                >
+                  <span style={{ color: 'var(--color-ink-muted)' }}>
+                    Boundary Vertex Count
+                  </span>
+                  <span className="font-mono" style={{ fontWeight: 500 }}>
+                    {vertexCount} vertices
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Created Timestamp */}
             {site.created_at && (
-              <div style={{ fontSize: '11px', color: 'var(--color-ink-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--color-ink-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginBottom: '20px',
+                }}
+              >
                 <Calendar size={13} />
                 Mapped on {new Date(site.created_at).toLocaleDateString()}
               </div>
@@ -274,8 +445,24 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
           <div>
             {/* Time Series Chart */}
             <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <div style={{ fontWeight: 600, fontSize: '12px', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '10px',
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    fontSize: '12px',
+                    color: 'var(--color-ink)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
                   <LineChart size={14} color="var(--color-teal)" />
                   NDVI & Canopy Cover Time-Series
                 </div>
@@ -286,7 +473,11 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                       onClick={() => handleSeedMetrics(false)}
                       disabled={seeding}
                       className="btn-secondary"
-                      style={{ fontSize: '10px', height: '22px', padding: '0 6px' }}
+                      style={{
+                        fontSize: '10px',
+                        height: '22px',
+                        padding: '0 6px',
+                      }}
                       title="Seed 12-month normal seasonal data"
                     >
                       <RefreshCw size={10} />
@@ -296,7 +487,11 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                       onClick={() => handleSeedMetrics(true)}
                       disabled={seeding}
                       className="btn-danger"
-                      style={{ fontSize: '10px', height: '22px', padding: '0 6px' }}
+                      style={{
+                        fontSize: '10px',
+                        height: '22px',
+                        padding: '0 6px',
+                      }}
                       title="Inject >10% degradation drop"
                     >
                       Simulate Drop
@@ -306,7 +501,14 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
               </div>
 
               {loading ? (
-                <div style={{ padding: '24px', textAlign: 'center', fontSize: '12px', color: 'var(--color-ink-muted)' }}>
+                <div
+                  style={{
+                    padding: '24px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    color: 'var(--color-ink-muted)',
+                  }}
+                >
                   Loading telemetry metrics...
                 </div>
               ) : (
@@ -318,12 +520,28 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
 
         {activeTab === 'history' && (
           <div>
-            <div className="card-container" style={{ padding: '14px', fontSize: '12px' }}>
-              <div style={{ fontWeight: 600, color: 'var(--color-ink)', marginBottom: '8px' }}>
+            <div
+              className="card-container"
+              style={{ padding: '14px', fontSize: '12px' }}
+            >
+              <div
+                style={{
+                  fontWeight: 600,
+                  color: 'var(--color-ink)',
+                  marginBottom: '8px',
+                }}
+              >
                 Audit History Trail
               </div>
-              <p style={{ color: 'var(--color-ink-muted)', fontSize: '11px', lineHeight: '1.4' }}>
-                All polygon boundary edits, metric ingestions, and telemetry updates are logged automatically via SQLAlchemy event listeners.
+              <p
+                style={{
+                  color: 'var(--color-ink-muted)',
+                  fontSize: '11px',
+                  lineHeight: '1.4',
+                }}
+              >
+                All polygon boundary edits, metric ingestions, and telemetry
+                updates are logged automatically via SQLAlchemy event listeners.
               </p>
             </div>
           </div>
@@ -331,7 +549,13 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
 
         {/* Delete Action (Admin only) */}
         {userRole === 'admin' && (
-          <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--color-line)' }}>
+          <div
+            style={{
+              marginTop: '24px',
+              paddingTop: '16px',
+              borderTop: '1px solid var(--color-line)',
+            }}
+          >
             <button
               onClick={() => onDeleteSite(site.id)}
               className="btn-danger"
@@ -346,4 +570,3 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
     </div>
   );
 };
-
