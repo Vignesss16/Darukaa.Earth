@@ -254,12 +254,17 @@ export const MapView: React.FC<MapViewProps> = ({
         const latestFeature = data.features[data.features.length - 1];
         if (latestFeature.geometry.type === 'Polygon') {
           onPolygonDrawn(latestFeature.geometry as GeoJSONPolygon);
+          setIsDrawing(false);
         }
       }
     };
 
     map.on('draw.create', handleDrawUpdate);
     map.on('draw.update', handleDrawUpdate);
+    map.on('draw.modechange', (e: { mode: string }) => {
+      setIsDrawing(e.mode === 'draw_polygon');
+      updateVertexCount(draw);
+    });
     map.on('draw.selectionchange', () => updateVertexCount(draw));
     map.on('draw.render', () => updateVertexCount(draw));
 
@@ -519,7 +524,7 @@ export const MapView: React.FC<MapViewProps> = ({
       </div>
 
       {/* Floating Drawing Mode Helper Banner */}
-      {isDrawing && (
+      {isDrawing && !drawnGeoJSON && (
         <div
           className="font-mono"
           style={{
