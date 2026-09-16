@@ -37,31 +37,32 @@ export const MapView: React.FC<MapViewProps> = ({
     lng: number;
     lat: number;
   } | null>(null);
-  const [drawVertexCount, setDrawVertexCount] = useState<number>(0);
+  const [clickCount, setClickCount] = useState<number>(0);
   const [mapStyle, setMapStyle] = useState<'light' | 'satellite' | 'outdoors'>(
     'light'
   );
 
-  const updateVertexCount = (draw: MapboxDraw | null) => {
-    if (!draw) return;
-    const data = draw.getAll();
-    if (data.features.length > 0) {
-      const feat = data.features[data.features.length - 1];
-      if (feat.geometry.type === 'Polygon' && feat.geometry.coordinates[0]) {
-        setDrawVertexCount(Math.max(0, feat.geometry.coordinates[0].length - 1));
-      } else if (
-        feat.geometry.type === 'LineString' &&
-        feat.geometry.coordinates
-      ) {
-        // Subtract 1 because MapboxDraw includes the moving cursor position as a coordinate
-        setDrawVertexCount(Math.max(0, feat.geometry.coordinates.length - 1));
-      } else {
-        setDrawVertexCount(0);
-      }
-    } else {
-      setDrawVertexCount(0);
-    }
-  };
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = toolbarRef.current;
+    if (!el) return;
+    const stop = (e: Event) => {
+      e.stopPropagation();
+    };
+    el.addEventListener('click', stop);
+    el.addEventListener('mousedown', stop);
+    el.addEventListener('mouseup', stop);
+    el.addEventListener('pointerdown', stop);
+    el.addEventListener('pointerup', stop);
+    return () => {
+      el.removeEventListener('click', stop);
+      el.removeEventListener('mousedown', stop);
+      el.removeEventListener('mouseup', stop);
+      el.removeEventListener('pointerdown', stop);
+      el.removeEventListener('pointerup', stop);
+    };
+  }, []);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -164,7 +165,11 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-line-active',
           type: 'line',
-          filter: ['all', ['==', '$type', 'LineString'], ['==', 'active', 'true']],
+          filter: [
+            'all',
+            ['==', '$type', 'LineString'],
+            ['==', 'active', 'true'],
+          ],
           paint: {
             'line-color': '#059669',
             'line-width': 3,
@@ -174,7 +179,11 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-line-inactive',
           type: 'line',
-          filter: ['all', ['==', '$type', 'LineString'], ['==', 'active', 'false']],
+          filter: [
+            'all',
+            ['==', '$type', 'LineString'],
+            ['==', 'active', 'false'],
+          ],
           paint: {
             'line-color': '#0D9488',
             'line-width': 2,
@@ -184,7 +193,12 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-polygon-and-line-vertex-stroke-inactive',
           type: 'circle',
-          filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
+          filter: [
+            'all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static'],
+          ],
           paint: {
             'circle-radius': 7,
             'circle-color': '#ffffff',
@@ -193,7 +207,12 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-polygon-and-line-vertex-inactive',
           type: 'circle',
-          filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
+          filter: [
+            'all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static'],
+          ],
           paint: {
             'circle-radius': 5,
             'circle-color': '#059669',
@@ -202,7 +221,12 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-polygon-and-line-vertex-active',
           type: 'circle',
-          filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['==', 'active', 'true']],
+          filter: [
+            'all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['==', 'active', 'true'],
+          ],
           paint: {
             'circle-radius': 8,
             'circle-color': '#131b2e',
@@ -239,23 +263,32 @@ export const MapView: React.FC<MapViewProps> = ({
     mapRef.current = map;
     drawRef.current = draw;
 
-    // Track mouse coordinates & update vertex HUD
+    // Track mouse coordinates
     map.on('mousemove', (e) => {
       setMouseCoords({
         lng: Number(e.lngLat.lng.toFixed(5)),
         lat: Number(e.lngLat.lat.toFixed(5)),
       });
-      updateVertexCount(draw);
+    });
+
+    map.on('click', (e: mapboxgl.MapMouseEvent) => {
+      if (draw.getMode() === 'draw_polygon') {
+        const target = e.originalEvent?.target as HTMLElement | undefined;
+        if (target && !target.classList.contains('mapboxgl-canvas')) {
+          return;
+        }
+        setClickCount((prev) => prev + 1);
+      }
     });
 
     const handleDrawUpdate = () => {
-      updateVertexCount(draw);
       const data = draw.getAll();
       if (data.features.length > 0) {
         const latestFeature = data.features[data.features.length - 1];
         if (latestFeature.geometry.type === 'Polygon') {
           onPolygonDrawn(latestFeature.geometry as GeoJSONPolygon);
           setIsDrawing(false);
+          setClickCount(0);
         }
       }
     };
@@ -263,11 +296,12 @@ export const MapView: React.FC<MapViewProps> = ({
     map.on('draw.create', handleDrawUpdate);
     map.on('draw.update', handleDrawUpdate);
     map.on('draw.modechange', (e: { mode: string }) => {
-      setIsDrawing(e.mode === 'draw_polygon');
-      updateVertexCount(draw);
+      const active = e.mode === 'draw_polygon';
+      setIsDrawing(active);
+      if (!active) {
+        setClickCount(0);
+      }
     });
-    map.on('draw.selectionchange', () => updateVertexCount(draw));
-    map.on('draw.render', () => updateVertexCount(draw));
 
     return () => {
       map.remove();
@@ -396,18 +430,30 @@ export const MapView: React.FC<MapViewProps> = ({
     }
   }, [selectedSite, sites]);
 
-  const handleStartDraw = () => {
+  const handleStartDraw = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    setClickCount(0);
     if (drawRef.current) {
       drawRef.current.deleteAll();
       drawRef.current.changeMode('draw_polygon');
       setIsDrawing(true);
+      setClickCount(0);
     }
   };
 
-  const handleClearDraw = () => {
+  const handleClearDraw = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     if (drawRef.current) {
       drawRef.current.deleteAll();
+      drawRef.current.changeMode('simple_select');
       setIsDrawing(false);
+      setClickCount(0);
       onPolygonDrawn(null);
     }
   };
@@ -418,7 +464,11 @@ export const MapView: React.FC<MapViewProps> = ({
 
       {/* Floating Top Control Toolbar */}
       <div
+        ref={toolbarRef}
         className="card-container"
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         style={{
           position: 'absolute',
           top: '16px',
@@ -549,13 +599,13 @@ export const MapView: React.FC<MapViewProps> = ({
             ● DRAWING MODE:
           </span>
           <span>
-            {drawVertexCount === 0
+            {clickCount === 0
               ? 'Click 1st point on map to start boundary'
-              : drawVertexCount === 1
-              ? 'Click 2nd point to draw line segment'
-              : drawVertexCount === 2
-              ? 'Click 3rd point to form initial shaded triangle'
-              : `Captured ${drawVertexCount} vertices — click to expand shape, or double-click to finish`}
+              : clickCount === 1
+                ? 'Click 2nd point to draw line segment'
+                : clickCount === 2
+                  ? 'Click 3rd point to form initial shaded triangle'
+                  : `Captured ${clickCount} vertices — click to expand shape, or double-click to finish`}
           </span>
         </div>
       )}
