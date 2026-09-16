@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Draw polygon site on map"
             >
               <MapPin size={13} />
-              + Draw Site
+              Draw Site
             </button>
             <button
               onClick={onOpenNewProject}
@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Create new project container"
             >
               <Plus size={13} />
-              + New Project
+              New Project
             </button>
           </div>
         )}

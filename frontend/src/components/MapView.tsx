@@ -37,9 +37,30 @@ export const MapView: React.FC<MapViewProps> = ({
     lng: number;
     lat: number;
   } | null>(null);
+  const [drawVertexCount, setDrawVertexCount] = useState<number>(0);
   const [mapStyle, setMapStyle] = useState<'light' | 'satellite' | 'outdoors'>(
     'light'
   );
+
+  const updateVertexCount = (draw: MapboxDraw | null) => {
+    if (!draw) return;
+    const data = draw.getAll();
+    if (data.features.length > 0) {
+      const feat = data.features[data.features.length - 1];
+      if (feat.geometry.type === 'Polygon' && feat.geometry.coordinates[0]) {
+        setDrawVertexCount(feat.geometry.coordinates[0].length - 1);
+      } else if (
+        feat.geometry.type === 'LineString' &&
+        feat.geometry.coordinates
+      ) {
+        setDrawVertexCount(feat.geometry.coordinates.length);
+      } else if (feat.geometry.type === 'Point') {
+        setDrawVertexCount(1);
+      }
+    } else {
+      setDrawVertexCount(0);
+    }
+  };
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -125,7 +146,7 @@ export const MapView: React.FC<MapViewProps> = ({
           filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
           paint: {
             'fill-color': '#059669',
-            'fill-opacity': 0.4,
+            'fill-opacity': 0.35,
           },
         },
         {
@@ -133,9 +154,81 @@ export const MapView: React.FC<MapViewProps> = ({
           type: 'line',
           filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
           paint: {
-            'line-color': '#0F172A',
-            'line-width': 2,
+            'line-color': '#131b2e',
+            'line-width': 2.5,
             'line-dasharray': [0.2, 2],
+          },
+        },
+        // Active & Inactive Lines (Connecting line segment during 1st & 2nd click)
+        {
+          id: 'gl-draw-line-active',
+          type: 'line',
+          filter: ['all', ['==', '$type', 'LineString'], ['==', 'active', 'true']],
+          paint: {
+            'line-color': '#059669',
+            'line-width': 3,
+            'line-dasharray': [2, 2],
+          },
+        },
+        {
+          id: 'gl-draw-line-inactive',
+          type: 'line',
+          filter: ['all', ['==', '$type', 'LineString'], ['==', 'active', 'false']],
+          paint: {
+            'line-color': '#0D9488',
+            'line-width': 2,
+          },
+        },
+        // Vertex points & handle dots (Every click immediately shows glowing vertex dots)
+        {
+          id: 'gl-draw-polygon-and-line-vertex-stroke-inactive',
+          type: 'circle',
+          filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
+          paint: {
+            'circle-radius': 7,
+            'circle-color': '#ffffff',
+          },
+        },
+        {
+          id: 'gl-draw-polygon-and-line-vertex-inactive',
+          type: 'circle',
+          filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
+          paint: {
+            'circle-radius': 5,
+            'circle-color': '#059669',
+          },
+        },
+        {
+          id: 'gl-draw-polygon-and-line-vertex-active',
+          type: 'circle',
+          filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['==', 'active', 'true']],
+          paint: {
+            'circle-radius': 8,
+            'circle-color': '#131b2e',
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#85f8c4',
+          },
+        },
+        {
+          id: 'gl-draw-point-active',
+          type: 'circle',
+          filter: ['all', ['==', '$type', 'Point'], ['==', 'active', 'true']],
+          paint: {
+            'circle-radius': 9,
+            'circle-color': '#059669',
+            'circle-stroke-width': 3,
+            'circle-stroke-color': '#ffffff',
+          },
+        },
+        {
+          id: 'gl-draw-point-inactive',
+          type: 'circle',
+          filter: ['all', ['==', '$type', 'Point'], ['==', 'active', 'false']],
+          paint: {
+            'circle-radius': 6,
+            'circle-color': '#0D9488',
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
           },
         },
       ],
@@ -145,15 +238,17 @@ export const MapView: React.FC<MapViewProps> = ({
     mapRef.current = map;
     drawRef.current = draw;
 
-    // Track mouse coordinates for HUD
+    // Track mouse coordinates & update vertex HUD
     map.on('mousemove', (e) => {
       setMouseCoords({
         lng: Number(e.lngLat.lng.toFixed(5)),
         lat: Number(e.lngLat.lat.toFixed(5)),
       });
+      updateVertexCount(draw);
     });
 
     const handleDrawUpdate = () => {
+      updateVertexCount(draw);
       const data = draw.getAll();
       if (data.features.length > 0) {
         const latestFeature = data.features[data.features.length - 1];
@@ -165,6 +260,8 @@ export const MapView: React.FC<MapViewProps> = ({
 
     map.on('draw.create', handleDrawUpdate);
     map.on('draw.update', handleDrawUpdate);
+    map.on('draw.selectionchange', () => updateVertexCount(draw));
+    map.on('draw.render', () => updateVertexCount(draw));
 
     return () => {
       map.remove();
@@ -420,6 +517,42 @@ export const MapView: React.FC<MapViewProps> = ({
           </>
         )}
       </div>
+
+      {/* Floating Drawing Mode Helper Banner */}
+      {isDrawing && (
+        <div
+          className="font-mono"
+          style={{
+            position: 'absolute',
+            top: '60px',
+            left: '60px',
+            padding: '8px 14px',
+            fontSize: '11px',
+            backgroundColor: '#131b2e',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            zIndex: 10,
+            borderRadius: '6px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+            border: '1px solid #2d3748',
+          }}
+        >
+          <span style={{ color: '#85f8c4', fontWeight: 600 }}>
+            ● DRAWING MODE:
+          </span>
+          <span>
+            {drawVertexCount === 0
+              ? 'Click 1st point on map to start boundary'
+              : drawVertexCount === 1
+              ? 'Click 2nd point to draw line segment'
+              : drawVertexCount === 2
+              ? 'Click 3rd point to form initial shaded triangle'
+              : `Captured ${drawVertexCount} vertices — click to expand shape, or double-click to finish`}
+          </span>
+        </div>
+      )}
 
       {/* Floating Bottom-Right Coordinate & Viewport HUD */}
       <div
