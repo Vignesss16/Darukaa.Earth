@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Site, GeoJSONPolygon, UserRole } from '../types';
-import { Plus, Trash2, MapPin } from 'lucide-react';
+import { Plus, Trash2, MapPin, Navigation } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
@@ -33,6 +33,9 @@ export const MapView: React.FC<MapViewProps> = ({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
 
+  const [mouseCoords, setMouseCoords] = useState<{ lng: number; lat: number } | null>(null);
+  const [mapStyle, setMapStyle] = useState<'light' | 'satellite' | 'outdoors'>('light');
+
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -40,16 +43,18 @@ export const MapView: React.FC<MapViewProps> = ({
       mapboxgl.accessToken = MAPBOX_TOKEN;
     }
 
-    const style: string | mapboxgl.Style = MAPBOX_TOKEN
-      ? 'mapbox://styles/mapbox/light-v11'
+    const styleUrl = MAPBOX_TOKEN
+      ? mapStyle === 'satellite'
+        ? 'mapbox://styles/mapbox/satellite-v9'
+        : mapStyle === 'outdoors'
+        ? 'mapbox://styles/mapbox/outdoors-v12'
+        : 'mapbox://styles/mapbox/light-v11'
       : {
           version: 8,
           sources: {
             'carto-light': {
               type: 'raster',
-              tiles: [
-                'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
-              ],
+              tiles: ['https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png'],
               tileSize: 256,
               attribution: '&copy; OpenStreetMap, &copy; CARTO',
             },
@@ -67,7 +72,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style,
+      style: styleUrl as string | mapboxgl.Style,
       center: [75.82, 11.27],
       zoom: 10,
     });
@@ -84,26 +89,18 @@ export const MapView: React.FC<MapViewProps> = ({
         {
           id: 'gl-draw-polygon-fill-inactive',
           type: 'fill',
-          filter: [
-            'all',
-            ['==', 'active', 'false'],
-            ['==', '$type', 'Polygon'],
-          ],
+          filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon']],
           paint: {
-            'fill-color': '#2F5233',
+            'fill-color': '#0D9488',
             'fill-opacity': 0.25,
           },
         },
         {
           id: 'gl-draw-polygon-stroke-inactive',
           type: 'line',
-          filter: [
-            'all',
-            ['==', 'active', 'false'],
-            ['==', '$type', 'Polygon'],
-          ],
+          filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon']],
           paint: {
-            'line-color': '#2F5233',
+            'line-color': '#0D9488',
             'line-width': 2,
           },
         },
@@ -112,7 +109,7 @@ export const MapView: React.FC<MapViewProps> = ({
           type: 'fill',
           filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
           paint: {
-            'fill-color': '#7A9B76',
+            'fill-color': '#059669',
             'fill-opacity': 0.4,
           },
         },
@@ -121,7 +118,7 @@ export const MapView: React.FC<MapViewProps> = ({
           type: 'line',
           filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
           paint: {
-            'line-color': '#2F5233',
+            'line-color': '#0F172A',
             'line-width': 2,
             'line-dasharray': [0.2, 2],
           },
@@ -132,6 +129,14 @@ export const MapView: React.FC<MapViewProps> = ({
     map.addControl(draw as unknown as mapboxgl.IControl, 'top-right');
     mapRef.current = map;
     drawRef.current = draw;
+
+    // Track mouse coordinates for HUD
+    map.on('mousemove', (e) => {
+      setMouseCoords({
+        lng: Number(e.lngLat.lng.toFixed(5)),
+        lat: Number(e.lngLat.lat.toFixed(5)),
+      });
+    });
 
     const handleDrawUpdate = () => {
       const data = draw.getAll();
@@ -149,7 +154,7 @@ export const MapView: React.FC<MapViewProps> = ({
     return () => {
       map.remove();
     };
-  }, [onPolygonDrawn]);
+  }, [onPolygonDrawn, mapStyle]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -194,8 +199,8 @@ export const MapView: React.FC<MapViewProps> = ({
             'fill-color': [
               'case',
               ['boolean', ['get', 'isSelected'], false],
-              '#7A9B76',
-              '#2F5233',
+              '#059669',
+              '#0D9488',
             ],
             'fill-opacity': [
               'case',
@@ -214,8 +219,8 @@ export const MapView: React.FC<MapViewProps> = ({
             'line-color': [
               'case',
               ['boolean', ['get', 'isSelected'], false],
-              '#1C2B22',
-              '#2F5233',
+              '#0F172A',
+              '#0D9488',
             ],
             'line-width': [
               'case',
@@ -256,11 +261,7 @@ export const MapView: React.FC<MapViewProps> = ({
     const map = mapRef.current;
     if (!map || sites.length === 0) return;
 
-    if (
-      selectedSite &&
-      selectedSite.geojson &&
-      selectedSite.geojson.coordinates
-    ) {
+    if (selectedSite && selectedSite.geojson && selectedSite.geojson.coordinates) {
       const coords = selectedSite.geojson.coordinates[0];
       const bounds = coords.reduce(
         (b, coord) => b.extend(coord as [number, number]),
@@ -293,14 +294,14 @@ export const MapView: React.FC<MapViewProps> = ({
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
+      {/* Floating Top Control Toolbar */}
       <div
+        className="card-container"
         style={{
           position: 'absolute',
           top: '16px',
           left: '60px',
-          backgroundColor: '#FFFFFF',
-          border: '1px solid var(--color-line)',
-          padding: '8px 12px',
+          padding: '6px 12px',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
@@ -310,15 +311,43 @@ export const MapView: React.FC<MapViewProps> = ({
         <div
           style={{
             fontWeight: 600,
-            fontSize: '13px',
+            fontSize: '12px',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
+            color: 'var(--color-ink)',
           }}
         >
-          <MapPin size={16} color="var(--color-canopy)" />
-          {sites.length} sites mapped
+          <MapPin size={15} color="var(--color-teal)" />
+          <span className="font-mono">{sites.length}</span> sites mapped
         </div>
+
+        {/* Map style selector */}
+        {MAPBOX_TOKEN && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button
+              onClick={() => setMapStyle('light')}
+              className={mapStyle === 'light' ? 'btn-primary' : 'btn-secondary'}
+              style={{ height: '24px', fontSize: '11px', padding: '0 8px' }}
+            >
+              Light
+            </button>
+            <button
+              onClick={() => setMapStyle('satellite')}
+              className={mapStyle === 'satellite' ? 'btn-primary' : 'btn-secondary'}
+              style={{ height: '24px', fontSize: '11px', padding: '0 8px' }}
+            >
+              Satellite
+            </button>
+            <button
+              onClick={() => setMapStyle('outdoors')}
+              className={mapStyle === 'outdoors' ? 'btn-primary' : 'btn-secondary'}
+              style={{ height: '24px', fontSize: '11px', padding: '0 8px' }}
+            >
+              Outdoors
+            </button>
+          </div>
+        )}
 
         {(userRole === 'admin' || userRole === 'analyst') && (
           <>
@@ -332,10 +361,10 @@ export const MapView: React.FC<MapViewProps> = ({
 
             <button
               onClick={handleStartDraw}
-              className="btn-primary"
-              style={{ padding: '6px 12px', fontSize: '12px' }}
+              className="btn-canopy"
+              style={{ height: '26px', fontSize: '11px', padding: '0 10px' }}
             >
-              <Plus size={14} />
+              <Plus size={13} />
               Draw site polygon
             </button>
 
@@ -344,10 +373,11 @@ export const MapView: React.FC<MapViewProps> = ({
                 onClick={onOpenSiteForm}
                 className="btn-primary"
                 style={{
-                  backgroundColor: 'var(--color-moss)',
-                  borderColor: 'var(--color-moss)',
-                  padding: '6px 12px',
-                  fontSize: '12px',
+                  backgroundColor: 'var(--color-emerald)',
+                  borderColor: 'var(--color-emerald)',
+                  height: '26px',
+                  fontSize: '11px',
+                  padding: '0 10px',
                 }}
               >
                 Save drawn polygon
@@ -358,15 +388,45 @@ export const MapView: React.FC<MapViewProps> = ({
               <button
                 onClick={handleClearDraw}
                 className="btn-secondary"
-                style={{ padding: '6px 10px', fontSize: '12px' }}
+                style={{ height: '26px', fontSize: '11px', padding: '0 8px' }}
               >
                 <Trash2 size={12} />
-                Cancel draw
+                Cancel
               </button>
             )}
           </>
         )}
       </div>
+
+      {/* Floating Bottom-Right Coordinate & Viewport HUD */}
+      <div
+        className="card-container font-mono"
+        style={{
+          position: 'absolute',
+          bottom: '16px',
+          right: '16px',
+          padding: '6px 12px',
+          fontSize: '11px',
+          color: 'var(--color-ink-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          zIndex: 5,
+          backgroundColor: 'rgba(255, 255, 255, 0.92)',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Navigation size={11} color="var(--color-teal)" />
+          <span>CURSOR:</span>
+          <span style={{ color: 'var(--color-ink)', fontWeight: 600 }}>
+            {mouseCoords ? `${mouseCoords.lat}° N, ${mouseCoords.lng}° E` : 'Hover map...'}
+          </span>
+        </div>
+        <span style={{ opacity: 0.4 }}>|</span>
+        <span>EPSG:4326</span>
+      </div>
     </div>
   );
 };
+

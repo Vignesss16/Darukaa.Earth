@@ -1,16 +1,25 @@
 /* Darukaa.Earth Design System & Design Tokens */
+/* Inspired by Stitch "Precision Planetary Intelligence" & Enterprise SaaS Standards */
+
 :root {
-  --color-bg: #f7f6f2;
-  --color-ink: #1c2b22;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
   --color-canopy: #2f5233;
+  --color-emerald: #059669;
   --color-moss: #7a9b76;
+  --color-teal: #0d9488;
   --color-clay: #b5563c;
-  --color-line: #d8d3c4;
+  --color-line: #e2e8f0;
+  --color-line-dark: #cbd5e1;
 
   --font-heading: 'Fraunces', Georgia, serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
   --radius-control: 6px;
+  --radius-pill: 9999px;
 }
 
 * {
@@ -27,7 +36,7 @@ body,
   background-color: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
@@ -41,11 +50,15 @@ h4,
   font-family: var(--font-heading);
   font-weight: 600;
   color: var(--color-ink);
-  letter-spacing: -0.01em;
-  text-transform: none; /* Sentence case throughout */
+  letter-spacing: -0.015em;
+  text-transform: none;
 }
 
-/* Base button and input styling with strict border-radius: 6px */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Base controls height: 32px standard */
 button,
 input,
 select,
@@ -56,96 +69,168 @@ textarea {
 }
 
 .btn-primary {
-  background-color: var(--color-canopy);
+  background-color: var(--color-ink);
   color: #ffffff;
-  border: 1px solid var(--color-canopy);
-  padding: 8px 14px;
+  border: 1px solid var(--color-ink);
+  height: 32px;
+  padding: 0 12px;
   font-weight: 500;
+  font-size: 13px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  transition: opacity 0.15s ease;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
 }
 
 .btn-primary:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
+}
+
+.btn-canopy {
+  background-color: var(--color-canopy);
+  color: #ffffff;
+  border: 1px solid var(--color-canopy);
+  height: 32px;
+  padding: 0 12px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-canopy:hover {
   opacity: 0.92;
 }
 
 .btn-secondary {
-  background-color: transparent;
+  background-color: #ffffff;
   color: var(--color-ink);
   border: 1px solid var(--color-line);
-  padding: 8px 14px;
+  height: 32px;
+  padding: 0 12px;
   font-weight: 500;
+  font-size: 13px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(216, 211, 196, 0.25);
+  background-color: #f1f5f9;
+  border-color: var(--color-line-dark);
 }
 
 .btn-danger {
-  background-color: var(--color-clay);
-  color: #ffffff;
-  border: 1px solid var(--color-clay);
-  padding: 8px 14px;
+  background-color: #ffffff;
+  color: var(--color-clay);
+  border: 1px solid rgba(181, 86, 60, 0.4);
+  height: 32px;
+  padding: 0 12px;
   font-weight: 500;
+  font-size: 13px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-danger:hover {
+  background-color: #fef2f2;
+  border-color: var(--color-clay);
 }
 
 .input-field {
   width: 100%;
-  padding: 8px 12px;
+  height: 32px;
+  padding: 0 10px;
   background: #ffffff;
   border: 1px solid var(--color-line);
   color: var(--color-ink);
+  font-size: 13px;
   outline: none;
+  transition: border-color 0.15s ease;
 }
 
 .input-field:focus {
-  border-color: var(--color-canopy);
+  border-color: var(--color-ink);
 }
 
-/* Badge indicators */
+/* Telemetry Pills and Status Badges */
 .badge {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 2px 8px;
-  border-radius: var(--radius-control);
+  height: 20px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.badge-emerald {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
 }
 
 .badge-moss {
-  background-color: rgba(122, 155, 118, 0.2);
+  background-color: rgba(122, 155, 118, 0.15);
   color: var(--color-canopy);
   border: 1px solid var(--color-moss);
 }
 
+.badge-teal {
+  background-color: #f0fdfa;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+}
+
 .badge-clay {
-  background-color: rgba(181, 86, 60, 0.15);
+  background-color: rgba(181, 86, 60, 0.12);
   color: var(--color-clay);
-  border: 1px solid var(--color-clay);
+  border: 1px solid rgba(181, 86, 60, 0.35);
 }
 
 .badge-neutral {
-  background-color: rgba(216, 211, 196, 0.3);
-  color: var(--color-ink);
+  background-color: #f1f5f9;
+  color: var(--color-ink-muted);
   border: 1px solid var(--color-line);
+}
+
+/* Card Container */
+.card-container {
+  background-color: #ffffff;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: var(--color-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-line);
+  background: var(--color-line-dark);
 }

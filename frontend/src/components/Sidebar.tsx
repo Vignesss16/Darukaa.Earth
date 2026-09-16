@@ -1,17 +1,21 @@
 import React from 'react';
 import {
+  LayoutDashboard,
   Layers,
   Map,
   LogOut,
   Shield,
   User as UserIcon,
   Activity,
+  Globe,
 } from 'lucide-react';
 import { User } from '../types';
 
+export type NavTab = 'dashboard' | 'map' | 'projects' | 'activity';
+
 interface SidebarProps {
-  currentTab: 'map' | 'projects' | 'activity';
-  onTabChange: (tab: 'map' | 'projects' | 'activity') => void;
+  currentTab: NavTab;
+  onTabChange: (tab: NavTab) => void;
   currentUser: User | null;
   onLogout: () => void;
 }
@@ -45,29 +49,90 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }}
         >
           <div
-            className="heading-serif"
             style={{
-              fontSize: '18px',
-              color: 'var(--color-canopy)',
-              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
             }}
           >
-            Darukaa.Earth
-          </div>
-          <div
-            style={{
-              fontSize: '11px',
-              color: 'var(--color-ink)',
-              opacity: 0.7,
-              marginTop: '2px',
-            }}
-          >
-            Conservation ops console
+            <div
+              style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '4px',
+                backgroundColor: 'var(--color-ink)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF',
+              }}
+            >
+              <Globe size={14} />
+            </div>
+            <div>
+              <div
+                className="heading-serif"
+                style={{
+                  fontSize: '16px',
+                  color: 'var(--color-ink)',
+                  fontWeight: 700,
+                  lineHeight: 1.2,
+                }}
+              >
+                Darukaa.Earth
+              </div>
+              <div
+                className="font-mono"
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--color-ink-muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Planetary Ops v2.4
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Navigation Items - Sentence Case */}
-        <nav style={{ padding: '16px 12px' }}>
+        {/* Navigation Items */}
+        <nav style={{ padding: '12px 8px' }}>
+          <button
+            onClick={() => onTabChange('dashboard')}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              border: 'none',
+              backgroundColor:
+                currentTab === 'dashboard' ? '#F1F5F9' : 'transparent',
+              color:
+                currentTab === 'dashboard'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)',
+              fontWeight: currentTab === 'dashboard' ? 600 : 400,
+              cursor: 'pointer',
+              marginBottom: '2px',
+              textAlign: 'left',
+              fontSize: '13px',
+              transition: 'all 0.12s ease',
+            }}
+          >
+            <LayoutDashboard
+              size={16}
+              color={
+                currentTab === 'dashboard'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)'
+              }
+            />
+            Dashboard
+          </button>
+
           <button
             onClick={() => onTabChange('map')}
             style={{
@@ -75,26 +140,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              padding: '10px 12px',
+              padding: '8px 12px',
+              borderRadius: '4px',
               border: 'none',
               backgroundColor:
-                currentTab === 'map' ? 'rgba(47, 82, 51, 0.08)' : 'transparent',
+                currentTab === 'map' ? '#F1F5F9' : 'transparent',
               color:
                 currentTab === 'map'
-                  ? 'var(--color-canopy)'
-                  : 'var(--color-ink)',
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)',
               fontWeight: currentTab === 'map' ? 600 : 400,
               cursor: 'pointer',
-              marginBottom: '4px',
+              marginBottom: '2px',
               textAlign: 'left',
+              fontSize: '13px',
+              transition: 'all 0.12s ease',
             }}
           >
             <Map
-              size={18}
+              size={16}
               color={
                 currentTab === 'map'
-                  ? 'var(--color-canopy)'
-                  : 'var(--color-ink)'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)'
               }
             />
             Sites map
@@ -107,28 +175,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              padding: '10px 12px',
+              padding: '8px 12px',
+              borderRadius: '4px',
               border: 'none',
               backgroundColor:
-                currentTab === 'projects'
-                  ? 'rgba(47, 82, 51, 0.08)'
-                  : 'transparent',
+                currentTab === 'projects' ? '#F1F5F9' : 'transparent',
               color:
                 currentTab === 'projects'
-                  ? 'var(--color-canopy)'
-                  : 'var(--color-ink)',
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)',
               fontWeight: currentTab === 'projects' ? 600 : 400,
               cursor: 'pointer',
-              marginBottom: '4px',
+              marginBottom: '2px',
               textAlign: 'left',
+              fontSize: '13px',
+              transition: 'all 0.12s ease',
             }}
           >
             <Layers
-              size={18}
+              size={16}
               color={
                 currentTab === 'projects'
-                  ? 'var(--color-canopy)'
-                  : 'var(--color-ink)'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)'
               }
             />
             Projects index
@@ -141,27 +210,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              padding: '10px 12px',
+              padding: '8px 12px',
+              borderRadius: '4px',
               border: 'none',
               backgroundColor:
-                currentTab === 'activity'
-                  ? 'rgba(47, 82, 51, 0.08)'
-                  : 'transparent',
+                currentTab === 'activity' ? '#F1F5F9' : 'transparent',
               color:
                 currentTab === 'activity'
-                  ? 'var(--color-canopy)'
-                  : 'var(--color-ink)',
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)',
               fontWeight: currentTab === 'activity' ? 600 : 400,
               cursor: 'pointer',
               textAlign: 'left',
+              fontSize: '13px',
+              transition: 'all 0.12s ease',
             }}
           >
             <Activity
-              size={18}
+              size={16}
               color={
                 currentTab === 'activity'
-                  ? 'var(--color-canopy)'
-                  : 'var(--color-ink)'
+                  ? 'var(--color-ink)'
+                  : 'var(--color-ink-muted)'
               }
             />
             Activity feed
@@ -172,9 +242,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* User Footer */}
       <div
         style={{
-          padding: '16px',
+          padding: '14px 16px',
           borderTop: '1px solid var(--color-line)',
-          backgroundColor: 'var(--color-bg)',
+          backgroundColor: '#FAFAFA',
         }}
       >
         {currentUser ? (
@@ -187,12 +257,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 marginBottom: '8px',
               }}
             >
-              <UserIcon size={16} color="var(--color-canopy)" />
+              <UserIcon size={16} color="var(--color-ink-muted)" />
               <div style={{ overflow: 'hidden' }}>
                 <div
                   style={{
                     fontWeight: 600,
-                    fontSize: '13px',
+                    fontSize: '12px',
                     whiteSpace: 'nowrap',
                     textOverflow: 'ellipsis',
                     overflow: 'hidden',
@@ -203,8 +273,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div
                   style={{
                     fontSize: '11px',
-                    color: 'var(--color-ink)',
-                    opacity: 0.7,
+                    color: 'var(--color-ink-muted)',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
                   }}
                 >
                   {currentUser.email}
@@ -220,21 +292,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 marginTop: '10px',
               }}
             >
-              <span
-                className="badge badge-moss"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
+              <span className="badge badge-emerald">
                 <Shield size={10} />
                 {currentUser.role}
               </span>
               <button
                 onClick={onLogout}
                 className="btn-secondary"
-                style={{ padding: '4px 8px', fontSize: '11px' }}
+                style={{ padding: '0 8px', height: '24px', fontSize: '11px' }}
                 title="Sign out"
               >
                 <LogOut size={12} />
@@ -246,8 +311,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div
             style={{
               fontSize: '12px',
-              color: 'var(--color-ink)',
-              opacity: 0.7,
+              color: 'var(--color-ink-muted)',
             }}
           >
             Not signed in
@@ -257,3 +321,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </aside>
   );
 };
+

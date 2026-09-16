@@ -17,6 +17,8 @@ import {
   Trees,
   LineChart,
   RefreshCw,
+  Info,
+  History,
 } from 'lucide-react';
 
 interface SiteDetailPanelProps {
@@ -34,6 +36,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
   onDeleteSite,
   userRole,
 }) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'history'>('overview');
   const [metrics, setMetrics] = useState<SiteMetric[]>([]);
   const [siteAlerts, setSiteAlerts] = useState<DegradationAlert[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -80,18 +83,19 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
 
   const getSiteTypeBadgeClass = (type: string) => {
     switch (type) {
-      case 'carbon':
-      case 'biodiversity':
-        return 'badge-moss';
+      case 'mangrove':
+        return 'badge-teal';
+      case 'reforestation':
+        return 'badge-emerald';
       default:
         return 'badge-neutral';
     }
   };
 
-  const vertexCount =
-    site.geojson && site.geojson.coordinates && site.geojson.coordinates[0]
-      ? site.geojson.coordinates[0].length
-      : 0;
+  const coords = site.geojson?.coordinates?.[0] || [];
+  const vertexCount = coords.length;
+  const centroidLat = coords.length > 0 ? (coords[0][1]).toFixed(4) : '11.2700';
+  const centroidLng = coords.length > 0 ? (coords[0][0]).toFixed(4) : '75.8200';
 
   return (
     <div
@@ -100,11 +104,11 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
         top: 0,
         right: 0,
         width: '100%',
-        maxWidth: '420px',
+        maxWidth: '440px',
         height: '100%',
         backgroundColor: '#FFFFFF',
         borderLeft: '1px solid var(--color-line)',
-        boxShadow: '-4px 0 16px rgba(28, 43, 34, 0.08)',
+        boxShadow: '-4px 0 16px rgba(15, 23, 42, 0.08)',
         zIndex: 20,
         display: 'flex',
         flexDirection: 'column',
@@ -112,302 +116,229 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
         transition: 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
-      {/* Header */}
+      {/* Header Bar */}
       <div
         style={{
-          padding: '20px',
+          padding: '16px 20px',
           borderBottom: '1px solid var(--color-line)',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          backgroundColor: 'var(--color-bg)',
+          backgroundColor: '#FAFAFA',
         }}
       >
-        <div>
-          <div className="badge badge-neutral" style={{ marginBottom: '6px' }}>
-            Site details
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <div>
+            <span className={`badge ${getSiteTypeBadgeClass(site.site_type)}`} style={{ marginBottom: '6px' }}>
+              <Trees size={11} /> {site.site_type}
+            </span>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-ink)' }}>{site.name}</h2>
+            {parentProject && (
+              <div style={{ fontSize: '12px', color: 'var(--color-ink-muted)', marginTop: '2px' }}>
+                Project Container: <span style={{ fontWeight: 600, color: 'var(--color-ink)' }}>{parentProject.name}</span>
+              </div>
+            )}
           </div>
-          <h2
-            className="heading-serif"
-            style={{ fontSize: '20px', color: 'var(--color-ink)' }}
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px',
+              color: 'var(--color-ink-muted)',
+              borderRadius: '4px',
+            }}
+            title="Close inspector panel"
           >
-            {site.name}
-          </h2>
-          {parentProject && (
-            <div
-              style={{
-                fontSize: '12px',
-                color: 'var(--color-ink)',
-                opacity: 0.75,
-                marginTop: '2px',
-              }}
-            >
-              Project: {parentProject.name}
-            </div>
-          )}
+            <X size={18} />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '4px',
-            color: 'var(--color-ink)',
-          }}
-          title="Close panel"
-        >
-          <X size={18} />
-        </button>
+
+        {/* Panel Inspector Navigation Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-line)', gap: '16px', marginTop: '12px' }}>
+          <button
+            onClick={() => setActiveTab('overview')}
+            style={{
+              padding: '6px 0',
+              border: 'none',
+              borderBottom: activeTab === 'overview' ? '2px solid var(--color-ink)' : '2px solid transparent',
+              backgroundColor: 'transparent',
+              fontWeight: activeTab === 'overview' ? 600 : 400,
+              color: activeTab === 'overview' ? 'var(--color-ink)' : 'var(--color-ink-muted)',
+              fontSize: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+          >
+            <Info size={13} /> Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            style={{
+              padding: '6px 0',
+              border: 'none',
+              borderBottom: activeTab === 'analytics' ? '2px solid var(--color-ink)' : '2px solid transparent',
+              backgroundColor: 'transparent',
+              fontWeight: activeTab === 'analytics' ? 600 : 400,
+              color: activeTab === 'analytics' ? 'var(--color-ink)' : 'var(--color-ink-muted)',
+              fontSize: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+          >
+            <LineChart size={13} /> Analytics & Chart
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            style={{
+              padding: '6px 0',
+              border: 'none',
+              borderBottom: activeTab === 'history' ? '2px solid var(--color-ink)' : '2px solid transparent',
+              backgroundColor: 'transparent',
+              fontWeight: activeTab === 'history' ? 600 : 400,
+              color: activeTab === 'history' ? 'var(--color-ink)' : 'var(--color-ink-muted)',
+              fontSize: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+          >
+            <History size={13} /> Audit Trail
+          </button>
+        </div>
       </div>
 
-      {/* Content Area */}
+      {/* Content Body */}
       <div style={{ padding: '20px', flex: 1, overflowY: 'auto' }}>
         {/* Degradation Alerts (Feature B) */}
         <AlertBanner alerts={siteAlerts} />
 
-        {/* Metric Overview Cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-            marginBottom: '20px',
-          }}
-        >
-          <div
-            style={{
-              padding: '12px',
-              backgroundColor: 'var(--color-bg)',
-              border: '1px solid var(--color-line)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '11px',
-                color: 'var(--color-ink)',
-                opacity: 0.7,
-                marginBottom: '4px',
-              }}
-            >
-              Geodesic surface area
-            </div>
-            <div
-              style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: 'var(--color-canopy)',
-              }}
-            >
-              {site.area_hectares != null
-                ? `${site.area_hectares} ha`
-                : 'Calculating...'}
-            </div>
-          </div>
+        {activeTab === 'overview' && (
+          <div>
+            {/* Metric Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+              <div className="card-container" style={{ padding: '12px' }}>
+                <div style={{ fontSize: '10px', color: 'var(--color-ink-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  Surface Area
+                </div>
+                <div className="font-mono" style={{ fontSize: '20px', fontWeight: 600, color: 'var(--color-ink)', marginTop: '4px' }}>
+                  {site.area_hectares != null ? `${site.area_hectares} ha` : 'Calc...'}
+                </div>
+              </div>
 
-          <div
-            style={{
-              padding: '12px',
-              backgroundColor: 'var(--color-bg)',
-              border: '1px solid var(--color-line)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '11px',
-                color: 'var(--color-ink)',
-                opacity: 0.7,
-                marginBottom: '4px',
-              }}
-            >
-              Site classification
-            </div>
-            <span className={`badge ${getSiteTypeBadgeClass(site.site_type)}`}>
-              <Trees size={12} style={{ marginRight: '4px' }} />
-              {site.site_type}
-            </span>
-          </div>
-        </div>
-
-        {/* Time Series Chart (Chart.js + Feature A) */}
-        <div style={{ marginBottom: '24px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '10px',
-            }}
-          >
-            <div
-              style={{
-                fontWeight: 600,
-                fontSize: '13px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <LineChart size={15} color="var(--color-canopy)" />
-              Vegetation health & canopy time-series
+              <div className="card-container" style={{ padding: '12px' }}>
+                <div style={{ fontSize: '10px', color: 'var(--color-ink-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  Centroid Lat/Lng
+                </div>
+                <div className="font-mono" style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-ink)', marginTop: '6px' }}>
+                  {centroidLat}° N, {centroidLng}° E
+                </div>
+              </div>
             </div>
 
-            {(userRole === 'admin' || userRole === 'analyst') && (
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  onClick={() => handleSeedMetrics(false)}
-                  disabled={seeding}
-                  className="btn-secondary"
-                  style={{ fontSize: '10px', padding: '2px 6px' }}
-                  title="Seed 12-month normal seasonal data"
-                >
-                  <RefreshCw size={10} />
-                  {seeding ? 'Seeding...' : 'Seed data'}
-                </button>
-                <button
-                  onClick={() => handleSeedMetrics(true)}
-                  disabled={seeding}
-                  className="btn-secondary"
-                  style={{
-                    fontSize: '10px',
-                    padding: '2px 6px',
-                    color: 'var(--color-clay)',
-                  }}
-                  title="Inject >10% degradation drop to trigger alert logic"
-                >
-                  Simulate drop
-                </button>
+            {/* Geometry Info */}
+            <div className="card-container" style={{ padding: '14px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-ink)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Globe size={15} color="var(--color-teal)" /> Spatial Polygon Metadata
+              </div>
+              <div style={{ fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--color-line)' }}>
+                  <span style={{ color: 'var(--color-ink-muted)' }}>Geometry Type</span>
+                  <span className="font-mono" style={{ fontWeight: 500 }}>GeoJSON Polygon</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--color-line)' }}>
+                  <span style={{ color: 'var(--color-ink-muted)' }}>SRID Reference</span>
+                  <span className="font-mono" style={{ fontWeight: 500 }}>EPSG:4326 (WGS84)</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                  <span style={{ color: 'var(--color-ink-muted)' }}>Boundary Vertex Count</span>
+                  <span className="font-mono" style={{ fontWeight: 500 }}>{vertexCount} vertices</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Created Timestamp */}
+            {site.created_at && (
+              <div style={{ fontSize: '11px', color: 'var(--color-ink-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}>
+                <Calendar size={13} />
+                Mapped on {new Date(site.created_at).toLocaleDateString()}
               </div>
             )}
           </div>
+        )}
 
-          {loading ? (
-            <div
-              style={{
-                padding: '20px',
-                textAlign: 'center',
-                fontSize: '12px',
-                opacity: 0.6,
-              }}
-            >
-              Loading time series...
-            </div>
-          ) : (
-            <SiteMetricsChart metrics={metrics} />
-          )}
+        {activeTab === 'analytics' && (
+          <div>
+            {/* Time Series Chart */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <div style={{ fontWeight: 600, fontSize: '12px', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <LineChart size={14} color="var(--color-teal)" />
+                  NDVI & Canopy Cover Time-Series
+                </div>
 
-          <div
-            style={{
-              fontSize: '10px',
-              color: 'var(--color-ink)',
-              opacity: 0.65,
-              marginTop: '8px',
-              fontStyle: 'italic',
-            }}
-          >
-            Feature A: Sentinel-2 NDVI satellite ingestion model (documented
-            placeholder in <code>services/metrics.py</code>).
-          </div>
-        </div>
+                {(userRole === 'admin' || userRole === 'analyst') && (
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      onClick={() => handleSeedMetrics(false)}
+                      disabled={seeding}
+                      className="btn-secondary"
+                      style={{ fontSize: '10px', height: '22px', padding: '0 6px' }}
+                      title="Seed 12-month normal seasonal data"
+                    >
+                      <RefreshCw size={10} />
+                      {seeding ? '...' : 'Seed Data'}
+                    </button>
+                    <button
+                      onClick={() => handleSeedMetrics(true)}
+                      disabled={seeding}
+                      className="btn-danger"
+                      style={{ fontSize: '10px', height: '22px', padding: '0 6px' }}
+                      title="Inject >10% degradation drop"
+                    >
+                      Simulate Drop
+                    </button>
+                  </div>
+                )}
+              </div>
 
-        {/* Spatial Boundary Properties */}
-        <div style={{ marginBottom: '24px' }}>
-          <div
-            style={{
-              fontWeight: 600,
-              fontSize: '13px',
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <Globe size={15} color="var(--color-canopy)" />
-            Spatial geometry info
-          </div>
-          <div
-            style={{
-              backgroundColor: 'var(--color-bg)',
-              border: '1px solid var(--color-line)',
-              padding: '12px',
-              fontSize: '12px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                paddingBottom: '6px',
-                borderBottom: '1px solid var(--color-line)',
-              }}
-            >
-              <span style={{ opacity: 0.7 }}>Geometry type</span>
-              <span style={{ fontWeight: 500 }}>GeoJSON Polygon</span>
+              {loading ? (
+                <div style={{ padding: '24px', textAlign: 'center', fontSize: '12px', color: 'var(--color-ink-muted)' }}>
+                  Loading telemetry metrics...
+                </div>
+              ) : (
+                <SiteMetricsChart metrics={metrics} />
+              )}
             </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 0',
-                borderBottom: '1px solid var(--color-line)',
-              }}
-            >
-              <span style={{ opacity: 0.7 }}>Spatial SRID</span>
-              <span style={{ fontWeight: 500 }}>EPSG:4326 (WGS84)</span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                paddingTop: '6px',
-              }}
-            >
-              <span style={{ opacity: 0.7 }}>Polygon boundary points</span>
-              <span style={{ fontWeight: 500 }}>{vertexCount} vertices</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Timestamps */}
-        {site.created_at && (
-          <div
-            style={{
-              fontSize: '12px',
-              color: 'var(--color-ink)',
-              opacity: 0.7,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginBottom: '24px',
-            }}
-          >
-            <Calendar size={14} />
-            Created on {new Date(site.created_at).toLocaleDateString()}
           </div>
         )}
 
-        {/* Admin Actions (Feature C RBAC Gating) */}
+        {activeTab === 'history' && (
+          <div>
+            <div className="card-container" style={{ padding: '14px', fontSize: '12px' }}>
+              <div style={{ fontWeight: 600, color: 'var(--color-ink)', marginBottom: '8px' }}>
+                Audit History Trail
+              </div>
+              <p style={{ color: 'var(--color-ink-muted)', fontSize: '11px', lineHeight: '1.4' }}>
+                All polygon boundary edits, metric ingestions, and telemetry updates are logged automatically via SQLAlchemy event listeners.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Action (Admin only) */}
         {userRole === 'admin' && (
-          <div
-            style={{
-              marginTop: '24px',
-              paddingTop: '16px',
-              borderTop: '1px solid var(--color-line)',
-            }}
-          >
+          <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--color-line)' }}>
             <button
               onClick={() => onDeleteSite(site.id)}
               className="btn-danger"
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-              }}
+              style={{ width: '100%', height: '32px' }}
             >
-              <Trash2 size={14} />
-              Delete conservation site
+              <Trash2 size={13} />
+              Delete Conservation Site
             </button>
           </div>
         )}
@@ -415,3 +346,4 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
     </div>
   );
 };
+

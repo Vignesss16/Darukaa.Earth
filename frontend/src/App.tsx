@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar, NavTab } from './components/Sidebar';
+import { Header } from './components/Header';
+import { DashboardView } from './components/DashboardView';
 import { MapView } from './components/MapView';
 import { SiteDetailPanel } from './components/SiteDetailPanel';
 import { ProjectTable } from './components/ProjectTable';
@@ -24,9 +26,7 @@ import {
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
-  const [currentTab, setCurrentTab] = useState<'map' | 'projects' | 'activity'>(
-    'map'
-  );
+  const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
@@ -35,6 +35,8 @@ export const App: React.FC = () => {
   const [drawnGeoJSON, setDrawnGeoJSON] = useState<GeoJSONPolygon | null>(null);
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [showSiteForm, setShowSiteForm] = useState<boolean>(false);
+
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     const { accessToken } = getStoredTokens();
@@ -144,6 +146,16 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleSelectSiteOnMap = (site: Site) => {
+    setCurrentTab('map');
+    setSelectedSite(site);
+  };
+
+  const handleOpenDrawMode = () => {
+    setCurrentTab('map');
+    setIsDrawing(true);
+  };
+
   return (
     <div
       style={{
@@ -151,6 +163,7 @@ export const App: React.FC = () => {
         width: '100vw',
         height: '100vh',
         overflow: 'hidden',
+        backgroundColor: 'var(--color-bg)',
       }}
     >
       <Sidebar
@@ -160,48 +173,69 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      <main
-        style={{
-          flex: 1,
-          height: '100%',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {currentTab === 'map' ? (
-          <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-            <MapView
-              sites={sites}
-              selectedSite={selectedSite}
-              onSelectSite={setSelectedSite}
-              onPolygonDrawn={setDrawnGeoJSON}
-              onOpenSiteForm={() => setShowSiteForm(true)}
-              isDrawing={isDrawing}
-              setIsDrawing={setIsDrawing}
-              drawnGeoJSON={drawnGeoJSON}
-              userRole={currentUser?.role}
-            />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        <Header
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          userRole={currentUser?.role}
+          onOpenDrawMode={handleOpenDrawMode}
+          onOpenNewProject={() => setCurrentTab('projects')}
+          activeTab={currentTab}
+        />
 
-            <SiteDetailPanel
-              site={selectedSite}
+        <main
+          style={{
+            flex: 1,
+            height: 'calc(100% - 48px)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {currentTab === 'dashboard' ? (
+            <DashboardView
               projects={projects}
-              onClose={() => setSelectedSite(null)}
-              onDeleteSite={handleDeleteSite}
+              sites={sites}
+              onSelectSiteOnMap={handleSelectSiteOnMap}
+              onNavigateTab={setCurrentTab}
               userRole={currentUser?.role}
+              searchQuery={searchQuery}
             />
-          </div>
-        ) : currentTab === 'projects' ? (
-          <ProjectTable
-            projects={projects}
-            onCreateProject={handleCreateProject}
-            onDeleteProject={handleDeleteProject}
-            onSelectProjectOnMap={handleSelectProjectOnMap}
-            userRole={currentUser?.role}
-          />
-        ) : (
-          <ActivityFeed />
-        )}
-      </main>
+          ) : currentTab === 'map' ? (
+            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+              <MapView
+                sites={sites}
+                selectedSite={selectedSite}
+                onSelectSite={setSelectedSite}
+                onPolygonDrawn={setDrawnGeoJSON}
+                onOpenSiteForm={() => setShowSiteForm(true)}
+                isDrawing={isDrawing}
+                setIsDrawing={setIsDrawing}
+                drawnGeoJSON={drawnGeoJSON}
+                userRole={currentUser?.role}
+              />
+
+              <SiteDetailPanel
+                site={selectedSite}
+                projects={projects}
+                onClose={() => setSelectedSite(null)}
+                onDeleteSite={handleDeleteSite}
+                userRole={currentUser?.role}
+              />
+            </div>
+          ) : currentTab === 'projects' ? (
+            <ProjectTable
+              projects={projects}
+              onCreateProject={handleCreateProject}
+              onDeleteProject={handleDeleteProject}
+              onSelectProjectOnMap={handleSelectProjectOnMap}
+              userRole={currentUser?.role}
+              searchQuery={searchQuery}
+            />
+          ) : (
+            <ActivityFeed />
+          )}
+        </main>
+      </div>
 
       {showSiteForm && (
         <SiteFormModal
