@@ -53,3 +53,4 @@ pgdata/
 Thumbs.db
 .env
 !.env.example
+*.exe
