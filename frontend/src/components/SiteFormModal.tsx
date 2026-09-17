@@ -120,10 +120,10 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      setErrorMsg('Site name is required.');
-      return;
-    }
+    const finalSiteName =
+      name.trim() ||
+      `Mapped Conservation Site #${Math.floor(1000 + Math.random() * 9000)}`;
+
     if (isNewProject && !newProjectName.trim()) {
       setErrorMsg('New project name is required.');
       return;
@@ -143,7 +143,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
       await onSaveSite(
         isNewProject ? null : projectId,
         isNewProject ? newProjectName.trim() : null,
-        name.trim(),
+        finalSiteName,
         siteType,
         drawnGeoJSON
       );

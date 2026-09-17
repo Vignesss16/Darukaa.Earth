@@ -137,6 +137,7 @@ export const App: React.FC = () => {
     setSelectedSite(newSite);
     setDrawnGeoJSON(null);
     setIsDrawing(false);
+    setShowSiteForm(false);
 
     const updatedProjects = await api.projects.list();
     setProjects(updatedProjects);
