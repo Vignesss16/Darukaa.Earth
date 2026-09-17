@@ -78,3 +78,43 @@ export interface ActivityLogItem {
   sentence: string;
   created_at: string;
 }
+
+export interface BulkImportResponse {
+  created_count: number;
+  sites: Site[];
+  message: string;
+}
+
+export interface SiteCompareResult {
+  site_ids: number[];
+  sites: Site[];
+  metrics_by_site: Record<number, SiteMetric[]>;
+  active_alert_counts: Record<number, number>;
+}
+
+export interface ProjectSummarySiteItem {
+  id: number;
+  name: string;
+  site_type: string;
+  area_hectares: number;
+  alert_count: number;
+  latest_canopy_cover: number | null;
+}
+
+export interface ProjectSummaryResult {
+  project_id: number;
+  project_name: string;
+  status: string;
+  total_sites: number;
+  total_area_hectares: number;
+  total_active_alerts: number;
+  site_type_counts: Record<string, number>;
+  sites: ProjectSummarySiteItem[];
+}
+
+export interface AssistantChatResponse {
+  response: string;
+  site_id: number;
+  site_name: string;
+  is_ai_generated: boolean;
+}

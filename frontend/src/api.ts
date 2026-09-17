@@ -1,9 +1,13 @@
 import {
   ActivityLogItem,
+  AssistantChatResponse,
+  BulkImportResponse,
   DegradationAlert,
   GeoJSONPolygon,
   Project,
+  ProjectSummaryResult,
   Site,
+  SiteCompareResult,
   SiteMetric,
   TokenResponse,
   User,
@@ -144,6 +148,8 @@ export const api = {
       request<void>(`/projects/${id}`, {
         method: 'DELETE',
       }),
+    getSummary: (id: number) =>
+      request<ProjectSummaryResult>(`/projects/${id}/summary`),
   },
   sites: {
     list: (projectId?: number, siteType?: string) => {
@@ -172,6 +178,24 @@ export const api = {
     delete: (id: number) =>
       request<void>(`/sites/${id}`, {
         method: 'DELETE',
+      }),
+    bulkImport: (projectId: number, featureCollection: object) =>
+      request<BulkImportResponse>('/sites/bulk', {
+        method: 'POST',
+        body: JSON.stringify({
+          project_id: projectId,
+          feature_collection: featureCollection,
+        }),
+      }),
+    compare: (siteIds: number[]) =>
+      request<SiteCompareResult>('/sites/compare', {
+        method: 'POST',
+        body: JSON.stringify({ site_ids: siteIds }),
+      }),
+    chatAssistant: (siteId: number, message: string) =>
+      request<AssistantChatResponse>(`/sites/${siteId}/assistant/chat`, {
+        method: 'POST',
+        body: JSON.stringify({ message }),
       }),
   },
   metrics: {

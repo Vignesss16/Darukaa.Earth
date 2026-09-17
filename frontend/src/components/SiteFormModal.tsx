@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { GeoJSONPolygon, Project, SiteType } from '../types';
-import { MapPin, AlertTriangle, Upload, CheckCircle2 } from 'lucide-react';
+import { api } from '../api';
+import {
+  MapPin,
+  AlertTriangle,
+  Upload,
+  CheckCircle2,
+  Layers,
+} from 'lucide-react';
 
 interface SiteFormModalProps {
   projects: Project[];
@@ -13,6 +20,12 @@ interface SiteFormModalProps {
     geojson: GeoJSONPolygon
   ) => Promise<void>;
   onClose: () => void;
+  onSuccessBulk?: () => void;
+}
+
+interface GeoJSONFeatureCollection {
+  type: string;
+  features: Array<unknown>;
 }
 
 export const SiteFormModal: React.FC<SiteFormModalProps> = ({
@@ -20,6 +33,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
   drawnGeoJSON: initialDrawnGeoJSON,
   onSaveSite,
   onClose,
+  onSuccessBulk,
 }) => {
   const [isNewProject, setIsNewProject] = useState<boolean>(
     projects.length === 0
@@ -33,6 +47,8 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
   const [drawnGeoJSON, setDrawnGeoJSON] = useState<GeoJSONPolygon | null>(
     initialDrawnGeoJSON
   );
+  const [bulkFeatureCollection, setBulkFeatureCollection] =
+    useState<GeoJSONFeatureCollection | null>(null);
   const [importedFileName, setImportedFileName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -51,6 +67,20 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
       try {
         const text = event.target?.result as string;
         const parsed = JSON.parse(text);
+
+        if (
+          parsed.type === 'FeatureCollection' &&
+          parsed.features?.length > 1
+        ) {
+          // Multi-feature GeoJSON bulk import
+          setBulkFeatureCollection(parsed);
+          setDrawnGeoJSON(null);
+          setImportedFileName(
+            `${file.name} (${parsed.features.length} Features)`
+          );
+          setErrorMsg('');
+          return;
+        }
 
         let rawGeom: {
           type: string;
@@ -81,7 +111,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
           (rawGeom.type !== 'Polygon' && rawGeom.type !== 'MultiPolygon')
         ) {
           throw new Error(
-            'Uploaded file does not contain a valid GeoJSON Polygon.'
+            'Uploaded file does not contain a valid GeoJSON Polygon or FeatureCollection.'
           );
         }
 
@@ -101,6 +131,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
           };
         }
 
+        setBulkFeatureCollection(null);
         setDrawnGeoJSON(finalPolygon);
         setImportedFileName(file.name);
         if (suggestedName && !name) {
@@ -120,9 +151,6 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalSiteName =
-      name.trim() ||
-      `Mapped Conservation Site #${Math.floor(1000 + Math.random() * 9000)}`;
 
     if (isNewProject && !newProjectName.trim()) {
       setErrorMsg('New project name is required.');
@@ -132,17 +160,43 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
       setErrorMsg('Please select a parent project.');
       return;
     }
-    if (!drawnGeoJSON) {
-      setErrorMsg('No polygon boundary has been drawn or imported.');
-      return;
-    }
 
     try {
       setIsSubmitting(true);
       setErrorMsg('');
+
+      // If project needs to be created first for bulk import or single site
+      let targetProjectId = projectId;
+      if (isNewProject) {
+        const createdProj = await api.projects.create({
+          name: newProjectName.trim(),
+          description: 'Created during site boundary import',
+          status: 'active',
+        });
+        targetProjectId = createdProj.id;
+      }
+
+      if (bulkFeatureCollection) {
+        // Bulk FeatureCollection creation
+        await api.sites.bulkImport(targetProjectId, bulkFeatureCollection);
+        if (onSuccessBulk) onSuccessBulk();
+        onClose();
+        return;
+      }
+
+      if (!drawnGeoJSON) {
+        setErrorMsg('No polygon boundary has been drawn or imported.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const finalSiteName =
+        name.trim() ||
+        `Mapped Conservation Site #${Math.floor(1000 + Math.random() * 9000)}`;
+
       await onSaveSite(
-        isNewProject ? null : projectId,
-        isNewProject ? newProjectName.trim() : null,
+        targetProjectId,
+        null,
         finalSiteName,
         siteType,
         drawnGeoJSON
@@ -150,7 +204,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
       onClose();
     } catch (err: unknown) {
       setErrorMsg(
-        err instanceof Error ? err.message : 'Failed to save site polygon.'
+        err instanceof Error ? err.message : 'Failed to save site polygon(s).'
       );
     } finally {
       setIsSubmitting(false);
@@ -176,7 +230,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
         className="card-container"
         style={{
           backgroundColor: '#FFFFFF',
-          width: '460px',
+          width: '480px',
           padding: '24px',
           borderRadius: '12px',
         }}
@@ -194,7 +248,9 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
             className="heading-serif"
             style={{ fontSize: '18px', color: 'var(--color-ink)' }}
           >
-            Save site boundary polygon
+            {bulkFeatureCollection
+              ? 'Bulk Import Sites'
+              : 'Save Site Boundary Polygon'}
           </h2>
         </div>
 
@@ -231,13 +287,8 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
                 marginBottom: '4px',
               }}
             >
-              <label
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 500,
-                }}
-              >
-                Parent project
+              <label style={{ fontSize: '12px', fontWeight: 500 }}>
+                Parent Project
               </label>
               {projects.length > 0 && (
                 <button
@@ -248,16 +299,11 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
                     border: 'none',
                     color: 'var(--color-secondary)',
                     fontSize: '11px',
-                    fontWeight: 600,
                     cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '2px',
+                    textDecoration: 'underline',
                   }}
                 >
-                  {isNewProject
-                    ? 'Select existing project'
-                    : 'Create new project'}
+                  {isNewProject ? 'Select Existing' : '+ New Project Container'}
                 </button>
               )}
             </div>
@@ -265,18 +311,28 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
             {isNewProject ? (
               <input
                 type="text"
-                required
-                placeholder="e.g. Amazon Carbon Reserve"
                 value={newProjectName}
                 onChange={(e) => setNewProjectName(e.target.value)}
-                className="input-field"
+                placeholder="Project Name..."
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--color-line)',
+                  fontSize: '13px',
+                }}
               />
             ) : (
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(Number(e.target.value))}
-                className="input-field"
-                required
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--color-line)',
+                  fontSize: '13px',
+                }}
               >
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -287,133 +343,168 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
             )}
           </div>
 
-          <div style={{ marginBottom: '14px' }}>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '12px',
-                fontWeight: 500,
-                marginBottom: '4px',
-              }}
-            >
-              Site name
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Wayanad North Rainforest Canopy"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input-field"
-            />
-          </div>
+          {!bulkFeatureCollection && (
+            <>
+              <div style={{ marginBottom: '14px' }}>
+                <label
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    display: 'block',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Site Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Northern Canopy Sector 4"
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--color-line)',
+                    fontSize: '13px',
+                  }}
+                />
+              </div>
 
+              <div style={{ marginBottom: '14px' }}>
+                <label
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    display: 'block',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Ecosystem Classification
+                </label>
+                <select
+                  value={siteType}
+                  onChange={(e) => setSiteType(e.target.value as SiteType)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--color-line)',
+                    fontSize: '13px',
+                  }}
+                >
+                  <option value="carbon">Carbon Reserve</option>
+                  <option value="biodiversity">Biodiversity Habitat</option>
+                  <option value="mixed">Mixed Ecosystem</option>
+                  <option value="mangrove">Mangrove Restoration</option>
+                  <option value="reforestation">Reforestation Zone</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* GeoJSON Import Options */}
           <div style={{ marginBottom: '16px' }}>
             <label
               style={{
-                display: 'block',
                 fontSize: '12px',
                 fontWeight: 500,
-                marginBottom: '4px',
-              }}
-            >
-              Site type / classification
-            </label>
-            <select
-              value={siteType}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                setSiteType(e.target.value as SiteType)
-              }
-              className="input-field"
-            >
-              <option value="carbon">Carbon sequestration site</option>
-              <option value="biodiversity">
-                Biodiversity conservation zone
-              </option>
-              <option value="mixed">Mixed carbon & biodiversity site</option>
-            </select>
-          </div>
-
-          {/* GeoJSON Boundary Info & Import Box */}
-          <div
-            style={{
-              padding: '12px',
-              backgroundColor: 'var(--color-bg)',
-              border: '1px solid var(--color-line)',
-              borderRadius: '6px',
-              fontSize: '12px',
-              marginBottom: '20px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                display: 'block',
                 marginBottom: '6px',
               }}
             >
-              <div style={{ fontWeight: 600 }}>Boundary geometry status</div>
+              Upload GeoJSON (Single Polygon or FeatureCollection)
+            </label>
+            <div
+              style={{
+                border: '1px dashed var(--color-line)',
+                padding: '12px',
+                borderRadius: '6px',
+                textAlign: 'center',
+                backgroundColor: 'var(--color-sand-light)',
+              }}
+            >
+              <input
+                type="file"
+                accept=".geojson,.json"
+                onChange={handleFileUpload}
+                id="geojson-file-upload"
+                style={{ display: 'none' }}
+              />
               <label
+                htmlFor="geojson-file-upload"
                 style={{
                   cursor: 'pointer',
-                  color: 'var(--color-teal)',
-                  fontWeight: 600,
-                  fontSize: '11px',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   gap: '4px',
+                  fontSize: '12px',
+                  color: 'var(--color-ink-muted)',
                 }}
               >
-                <Upload size={12} />
-                <span>Import .geojson</span>
-                <input
-                  type="file"
-                  accept=".json,.geojson"
-                  onChange={handleFileUpload}
-                  style={{ display: 'none' }}
-                />
+                <Upload size={18} color="var(--color-canopy)" />
+                {importedFileName ? (
+                  <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 size={14} /> {importedFileName}
+                  </span>
+                ) : (
+                  <span>Click to upload .geojson file</span>
+                )}
               </label>
             </div>
-            <div style={{ color: 'var(--color-ink)', opacity: 0.85 }}>
-              {drawnGeoJSON ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    color: 'var(--color-emerald)',
-                  }}
-                >
-                  <CheckCircle2 size={14} />
-                  <span>
-                    GeoJSON Polygon active ({vertexCount} vertices)
-                    {importedFileName
-                      ? ` — imported from ${importedFileName}`
-                      : ''}
-                  </span>
-                </div>
-              ) : (
-                <span style={{ color: 'var(--color-clay)' }}>
-                  No boundary captured yet. Draw on map or click 'Import
-                  .geojson'.
-                </span>
-              )}
-            </div>
           </div>
+
+          {bulkFeatureCollection && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg mb-4 text-xs text-emerald-800 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div>
+                <strong>FeatureCollection Detected!</strong>
+                <p>
+                  Ready to batch import {bulkFeatureCollection.features.length}{' '}
+                  site polygons into the selected project container.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {drawnGeoJSON && !bulkFeatureCollection && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-ink-muted)',
+                marginBottom: '16px',
+                backgroundColor: 'var(--color-sand-light)',
+                padding: '8px 10px',
+                borderRadius: '6px',
+              }}
+            >
+              Boundary Vertex Count: <strong>{vertexCount} vertices</strong>
+            </div>
+          )}
 
           <div
             style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}
           >
-            <button type="button" onClick={onClose} className="btn-secondary">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary"
+              style={{ height: '34px', fontSize: '12px' }}
+            >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !drawnGeoJSON}
+              disabled={isSubmitting}
               className="btn-primary"
+              style={{ height: '34px', fontSize: '12px' }}
             >
-              {isSubmitting ? 'Validating & saving...' : 'Save site'}
+              {isSubmitting
+                ? 'Saving...'
+                : bulkFeatureCollection
+                  ? `Import ${bulkFeatureCollection.features.length} Sites`
+                  : 'Save Site Boundary'}
             </button>
           </div>
         </form>

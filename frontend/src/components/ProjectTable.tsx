@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
 import { Project, UserRole } from '../types';
-import { Plus, Search, Layers, Eye, Trash2, Globe } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  Layers,
+  Eye,
+  Trash2,
+  Globe,
+  FileText,
+  BarChart2,
+} from 'lucide-react';
 
 interface ProjectTableProps {
   projects: Project[];
   onCreateProject: (name: string, description?: string) => Promise<void>;
   onDeleteProject: (id: number) => Promise<void>;
   onSelectProjectOnMap: (projectId: number) => void;
+  onOpenCompare?: () => void;
+  onOpenExportSummary?: (project: Project) => void;
   userRole?: UserRole;
   searchQuery?: string;
 }
@@ -16,6 +27,8 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
   onCreateProject,
   onDeleteProject,
   onSelectProjectOnMap,
+  onOpenCompare,
+  onOpenExportSummary,
   userRole,
   searchQuery: externalSearchQuery = '',
 }) => {
@@ -105,15 +118,29 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
           </p>
         </div>
 
-        {(userRole === 'admin' || userRole === 'analyst') && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="btn-canopy"
-          >
-            <Plus size={14} />
-            New Project
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {onOpenCompare && (
+            <button
+              onClick={onOpenCompare}
+              className="btn-secondary"
+              style={{ height: '32px', fontSize: '12px' }}
+            >
+              <BarChart2 size={14} className="text-emerald-600" />
+              Compare Sites
+            </button>
+          )}
+
+          {(userRole === 'admin' || userRole === 'analyst') && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="btn-canopy"
+              style={{ height: '32px', fontSize: '12px' }}
+            >
+              <Plus size={14} />
+              New Project
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
@@ -309,6 +336,22 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                           <Eye size={12} />
                           Inspect Map
                         </button>
+
+                        {onOpenExportSummary && (
+                          <button
+                            onClick={() => onOpenExportSummary(project)}
+                            className="btn-secondary"
+                            style={{
+                              height: '26px',
+                              fontSize: '11px',
+                              padding: '0 8px',
+                            }}
+                            title="Export executive project summary report"
+                          >
+                            <FileText size={12} className="text-emerald-600" />
+                            Summary
+                          </button>
+                        )}
 
                         {userRole === 'admin' && (
                           <button

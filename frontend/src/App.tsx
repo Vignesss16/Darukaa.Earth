@@ -7,6 +7,8 @@ import { SiteDetailPanel } from './components/SiteDetailPanel';
 import { ProjectTable } from './components/ProjectTable';
 import { ActivityFeed } from './components/ActivityFeed';
 import { SiteFormModal } from './components/SiteFormModal';
+import { SiteCompareModal } from './components/SiteCompareModal';
+import { ProjectExportModal } from './components/ProjectExportModal';
 import { AuthModal } from './components/AuthModal';
 import {
   api,
@@ -37,6 +39,10 @@ export const App: React.FC = () => {
   const [showSiteForm, setShowSiteForm] = useState<boolean>(false);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Enhancement Modals State
+  const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
+  const [exportProject, setExportProject] = useState<Project | null>(null);
 
   useEffect(() => {
     const { accessToken } = getStoredTokens();
@@ -254,6 +260,8 @@ export const App: React.FC = () => {
               onCreateProject={handleCreateProject}
               onDeleteProject={handleDeleteProject}
               onSelectProjectOnMap={handleSelectProjectOnMap}
+              onOpenCompare={() => setShowCompareModal(true)}
+              onOpenExportSummary={(proj) => setExportProject(proj)}
               userRole={currentUser?.role}
               searchQuery={searchQuery}
             />
@@ -269,6 +277,23 @@ export const App: React.FC = () => {
           drawnGeoJSON={drawnGeoJSON}
           onSaveSite={handleSaveSite}
           onClose={() => setShowSiteForm(false)}
+          onSuccessBulk={loadData}
+        />
+      )}
+
+      {showCompareModal && (
+        <SiteCompareModal
+          sites={sites}
+          isOpen={showCompareModal}
+          onClose={() => setShowCompareModal(false)}
+        />
+      )}
+
+      {exportProject && (
+        <ProjectExportModal
+          project={exportProject}
+          isOpen={!!exportProject}
+          onClose={() => setExportProject(null)}
         />
       )}
 

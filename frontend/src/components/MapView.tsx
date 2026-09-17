@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Site, GeoJSONPolygon, UserRole } from '../types';
-import { Plus, Trash2, MapPin, Navigation } from 'lucide-react';
+import { Plus, Trash2, MapPin, Navigation, Search } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
@@ -41,6 +41,7 @@ export const MapView: React.FC<MapViewProps> = ({
   const [mapStyle, setMapStyle] = useState<'light' | 'satellite' | 'outdoors'>(
     'light'
   );
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -293,10 +294,20 @@ export const MapView: React.FC<MapViewProps> = ({
     const updateLayers = () => {
       const sourceId = 'sites-geojson-source';
 
+      // Filter sites by search query if text provided
+      const trimmedQuery = searchQuery.trim().toLowerCase();
+      const filteredSites = trimmedQuery
+        ? sites.filter(
+            (s) =>
+              s.name.toLowerCase().includes(trimmedQuery) ||
+              s.site_type.toLowerCase().includes(trimmedQuery)
+          )
+        : sites;
+
       const featureCollection = {
         type: 'FeatureCollection',
-        features: sites
-          .filter((s) => s.geojson && s.geojson.type === 'Polygon')
+        features: filteredSites
+          .filter((site) => site.geojson && site.geojson.coordinates)
           .map((site) => ({
             type: 'Feature',
             id: site.id,
@@ -469,6 +480,38 @@ export const MapView: React.FC<MapViewProps> = ({
         >
           <MapPin size={15} color="var(--color-teal)" />
           <span className="font-mono">{sites.length}</span> sites mapped
+        </div>
+
+        {/* Search & Coordinate Jump Input */}
+        <div className="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
+          <Search size={13} className="text-slate-400 shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearchQuery(val);
+
+              // Check if coordinate query like "11.27, 75.82" or "11.27 75.82"
+              const coordMatch = val.match(
+                /^(-?\d+(\.\d+)?)[,\s]+(-?\d+(\.\d+)?)$/
+              );
+              if (coordMatch && mapRef.current) {
+                const p1 = parseFloat(coordMatch[1]);
+                const p3 = parseFloat(coordMatch[3]);
+                // Assume lat is first if ~ -90..90 and lng second, or vice versa
+                let lat = p1;
+                let lng = p3;
+                if (Math.abs(p1) > 90) {
+                  lng = p1;
+                  lat = p3;
+                }
+                mapRef.current.flyTo({ center: [lng, lat], zoom: 14 });
+              }
+            }}
+            placeholder="Search sites or lat, lng..."
+            className="w-40 text-xs bg-transparent border-none outline-none text-slate-800 placeholder-slate-400"
+          />
         </div>
 
         {/* Map style selector */}

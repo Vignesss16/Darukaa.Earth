@@ -173,3 +173,67 @@ class SiteMetricOut(BaseModel):
     value: float
     recorded_at: date
     source: str
+
+
+# ==========================================
+# Bulk Import & Comparison Schemas
+# ==========================================
+class BulkSiteImportRequest(BaseModel):
+    project_id: int
+    feature_collection: Dict[str, Any]
+
+
+class BulkSiteImportResponse(BaseModel):
+    imported_count: int
+    project_id: int
+    project_name: str
+    sites: list[SiteOut]
+
+
+class SiteCompareRequest(BaseModel):
+    site_ids: list[int]
+
+
+class SiteCompareOut(BaseModel):
+    sites: list[SiteOut]
+    metrics_by_site: Dict[int, list[SiteMetricOut]]
+    active_alert_counts: Dict[int, int]
+
+
+# ==========================================
+# Project Summary Rollup Schemas
+# ==========================================
+class ProjectSummarySiteItem(BaseModel):
+    site_id: int
+    name: str
+    site_type: str
+    area_hectares: Optional[float] = 0.0
+    active_alert_count: int = 0
+    latest_canopy_cover: Optional[float] = None
+    latest_ndvi: Optional[float] = None
+    health_status: str = "Healthy"
+
+
+class ProjectSummaryOut(BaseModel):
+    project_id: int
+    project_name: str
+    description: Optional[str] = None
+    total_sites: int
+    total_area_hectares: float
+    sites_by_classification: Dict[str, int]
+    total_active_alerts: int
+    site_summaries: list[ProjectSummarySiteItem]
+
+
+# ==========================================
+# AI Assistant Schemas
+# ==========================================
+class AssistantChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=1000)
+
+
+class AssistantChatResponse(BaseModel):
+    response: str
+    site_id: int
+    site_name: str
+    is_ai_generated: bool = True
