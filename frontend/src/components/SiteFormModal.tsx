@@ -92,12 +92,12 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
         ) {
           finalPolygon = {
             type: 'Polygon',
-            coordinates: rawGeom.coordinates[0],
+            coordinates: rawGeom.coordinates[0] as number[][][],
           };
         } else {
           finalPolygon = {
             type: 'Polygon',
-            coordinates: rawGeom.coordinates,
+            coordinates: rawGeom.coordinates as number[][][],
           };
         }
 

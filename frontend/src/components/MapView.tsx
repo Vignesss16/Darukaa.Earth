@@ -42,28 +42,6 @@ export const MapView: React.FC<MapViewProps> = ({
     'light'
   );
 
-  const toolbarRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = toolbarRef.current;
-    if (!el) return;
-    const stop = (e: Event) => {
-      e.stopPropagation();
-    };
-    el.addEventListener('click', stop);
-    el.addEventListener('mousedown', stop);
-    el.addEventListener('mouseup', stop);
-    el.addEventListener('pointerdown', stop);
-    el.addEventListener('pointerup', stop);
-    return () => {
-      el.removeEventListener('click', stop);
-      el.removeEventListener('mousedown', stop);
-      el.removeEventListener('mouseup', stop);
-      el.removeEventListener('pointerdown', stop);
-      el.removeEventListener('pointerup', stop);
-    };
-  }, []);
-
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -464,7 +442,6 @@ export const MapView: React.FC<MapViewProps> = ({
 
       {/* Floating Top Control Toolbar */}
       <div
-        ref={toolbarRef}
         className="card-container"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
