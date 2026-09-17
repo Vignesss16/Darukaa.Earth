@@ -20,7 +20,9 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
   searchQuery: externalSearchQuery = '',
 }) => {
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived'>('all');
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'archived'
+  >('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
@@ -32,7 +34,8 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
   const filteredProjects = projects.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
-      (p.description && p.description.toLowerCase().includes(activeSearch.toLowerCase()));
+      (p.description &&
+        p.description.toLowerCase().includes(activeSearch.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -46,12 +49,17 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
     try {
       setIsSubmitting(true);
       setErrorMsg('');
-      await onCreateProject(newProjectName.trim(), newProjectDesc.trim() || undefined);
+      await onCreateProject(
+        newProjectName.trim(),
+        newProjectDesc.trim() || undefined
+      );
       setNewProjectName('');
       setNewProjectDesc('');
       setShowCreateModal(false);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Failed to create project');
+      setErrorMsg(
+        err instanceof Error ? err.message : 'Failed to create project'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -76,18 +84,34 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
         }}
       >
         <div>
-          <h1 style={{ fontSize: '20px', color: 'var(--color-ink)', fontWeight: 700 }}>
+          <h1
+            style={{
+              fontSize: '20px',
+              color: 'var(--color-ink)',
+              fontWeight: 700,
+            }}
+          >
             Conservation Projects Directory
           </h1>
-          <p style={{ fontSize: '12px', color: 'var(--color-ink-muted)', marginTop: '2px' }}>
-            High-density enterprise index of carbon offset reserves and biodiversity restoration projects.
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--color-ink-muted)',
+              marginTop: '2px',
+            }}
+          >
+            High-density enterprise index of carbon offset reserves and
+            biodiversity restoration projects.
           </p>
         </div>
 
         {(userRole === 'admin' || userRole === 'analyst') && (
-          <button onClick={() => setShowCreateModal(true)} className="btn-canopy">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn-canopy"
+          >
             <Plus size={14} />
-            + New Project Container
+            New Project
           </button>
         )}
       </div>
@@ -104,11 +128,22 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
           backgroundColor: '#FFFFFF',
         }}
       >
-        <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+        <div
+          style={{
+            position: 'relative',
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <Search
             size={14}
             color="var(--color-ink-muted)"
-            style={{ position: 'absolute', left: '10px', pointerEvents: 'none' }}
+            style={{
+              position: 'absolute',
+              left: '10px',
+              pointerEvents: 'none',
+            }}
           />
           <input
             type="text"
@@ -136,7 +171,13 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
 
       {/* Scannable Project Index Table */}
       <div className="card-container" style={{ overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            textAlign: 'left',
+          }}
+        >
           <thead>
             <tr
               className="font-mono"
@@ -154,7 +195,9 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
               <th style={{ padding: '10px 16px' }}>Sites Count</th>
               <th style={{ padding: '10px 16px' }}>Estimated Hectares</th>
               <th style={{ padding: '10px 16px' }}>Created Date</th>
-              <th style={{ padding: '10px 16px', textAlign: 'right' }}>Actions</th>
+              <th style={{ padding: '10px 16px', textAlign: 'right' }}>
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -169,7 +212,8 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                     fontSize: '13px',
                   }}
                 >
-                  No sites yet in this project. Draw one on the map to get started.
+                  No sites yet in this project. Draw one on the map to get
+                  started.
                 </td>
               </tr>
             ) : (
@@ -183,40 +227,84 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                       borderBottom: '1px solid var(--color-line)',
                       transition: 'background-color 0.12s ease',
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F8FAFC')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = '#F8FAFC')
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = 'transparent')
+                    }
                   >
                     <td style={{ padding: '12px 16px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--color-ink)' }}>{project.name}</div>
+                      <div
+                        style={{ fontWeight: 600, color: 'var(--color-ink)' }}
+                      >
+                        {project.name}
+                      </div>
                       {project.description && (
-                        <div style={{ fontSize: '11px', color: 'var(--color-ink-muted)', marginTop: '2px' }}>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            color: 'var(--color-ink-muted)',
+                            marginTop: '2px',
+                          }}
+                        >
                           {project.description}
                         </div>
                       )}
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span className={project.status === 'active' ? 'badge badge-emerald' : 'badge badge-neutral'}>
+                      <span
+                        className={
+                          project.status === 'active'
+                            ? 'badge badge-emerald'
+                            : 'badge badge-neutral'
+                        }
+                      >
                         {project.status}
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span className="font-mono" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <span
+                        className="font-mono"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          fontSize: '12px',
+                        }}
+                      >
                         <Layers size={13} color="var(--color-teal)" />
                         {project.site_count || 0} sites
                       </span>
                     </td>
-                    <td className="font-mono" style={{ padding: '12px 16px', fontSize: '12px' }}>
+                    <td
+                      className="font-mono"
+                      style={{ padding: '12px 16px', fontSize: '12px' }}
+                    >
                       {estHectares.toLocaleString()} ha
                     </td>
-                    <td className="font-mono" style={{ padding: '12px 16px', fontSize: '11px', color: 'var(--color-ink-muted)' }}>
-                      {project.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'}
+                    <td
+                      className="font-mono"
+                      style={{
+                        padding: '12px 16px',
+                        fontSize: '11px',
+                        color: 'var(--color-ink-muted)',
+                      }}
+                    >
+                      {project.created_at
+                        ? new Date(project.created_at).toLocaleDateString()
+                        : 'N/A'}
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', gap: '6px' }}>
                         <button
                           onClick={() => onSelectProjectOnMap(project.id)}
                           className="btn-secondary"
-                          style={{ height: '26px', fontSize: '11px', padding: '0 8px' }}
+                          style={{
+                            height: '26px',
+                            fontSize: '11px',
+                            padding: '0 8px',
+                          }}
                         >
                           <Eye size={12} />
                           Inspect Map
@@ -226,7 +314,11 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                           <button
                             onClick={() => onDeleteProject(project.id)}
                             className="btn-danger"
-                            style={{ height: '26px', fontSize: '11px', padding: '0 8px' }}
+                            style={{
+                              height: '26px',
+                              fontSize: '11px',
+                              padding: '0 8px',
+                            }}
                           >
                             <Trash2 size={12} />
                             Delete
@@ -267,9 +359,22 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '16px',
+              }}
+            >
               <Globe size={18} color="var(--color-teal)" />
-              <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-ink)' }}>
+              <h2
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  color: 'var(--color-ink)',
+                }}
+              >
                 Create Conservation Project
               </h2>
             </div>
@@ -292,8 +397,15 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
 
             <form onSubmit={handleCreateSubmit}>
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
-                  Project Container Name *
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    marginBottom: '4px',
+                  }}
+                >
+                  Project Name *
                 </label>
                 <input
                   type="text"
@@ -307,7 +419,14 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
               </div>
 
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    marginBottom: '4px',
+                  }}
+                >
                   Description & Regional Objectives
                 </label>
                 <textarea
@@ -320,7 +439,13 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '8px',
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
@@ -335,7 +460,7 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                   className="btn-canopy"
                   style={{ height: '30px' }}
                 >
-                  {isSubmitting ? 'Creating Project...' : 'Save Project Container'}
+                  {isSubmitting ? 'Creating Project...' : 'Save Project'}
                 </button>
               </div>
             </form>
@@ -345,4 +470,3 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
     </div>
   );
 };
-

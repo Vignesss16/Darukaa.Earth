@@ -257,7 +257,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
                 >
                   {isNewProject
                     ? 'Select existing project'
-                    : '+ Create new project'}
+                    : 'Create new project'}
                 </button>
               )}
             </div>

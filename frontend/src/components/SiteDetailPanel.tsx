@@ -164,7 +164,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                   marginTop: '2px',
                 }}
               >
-                Project Container:{' '}
+                Parent Project:{' '}
                 <span style={{ fontWeight: 600, color: 'var(--color-ink)' }}>
                   {parentProject.name}
                 </span>
