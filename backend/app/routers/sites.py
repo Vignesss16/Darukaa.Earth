@@ -403,6 +403,11 @@ def _call_groq_ai(
     if not groq_key:
         return None
 
+    site_type_str = (
+        site.site_type.value
+        if hasattr(site.site_type, "value")
+        else str(site.site_type).replace("SiteType.", "").lower()
+    )
     canopy_vals = [m.value for m in metrics if m.metric_type == "canopy_cover"]
     latest_canopy = canopy_vals[-1] if canopy_vals else "N/A"
     alert_summary = (
@@ -413,7 +418,7 @@ def _call_groq_ai(
         f"You are the Darukaa.Earth AI Assistant scoped strictly to Site '{site.name}' (ID: {site.id}).\n"
         f"SITE CONTEXT:\n"
         f"- Project ID: {site.project_id}\n"
-        f"- Classification: {site.site_type}\n"
+        f"- Classification: {site_type_str}\n"
         f"- Area (hectares): {site.area_hectares}\n"
         f"- Latest Canopy Cover: {latest_canopy}%\n"
         f"- Active Degradation Alerts: {alert_summary}\n\n"
@@ -449,28 +454,54 @@ def _call_groq_ai(
 def _generate_fallback_site_response(
     site: Site, metrics: List[SiteMetric], alerts: List[Dict[str, Any]], user_msg: str
 ) -> str:
-    msg_lower = user_msg.lower()
+    msg_lower = user_msg.strip().lower()
+    site_type_str = (
+        site.site_type.value
+        if hasattr(site.site_type, "value")
+        else str(site.site_type).replace("SiteType.", "").lower()
+    )
     canopy_vals = [m.value for m in metrics if m.metric_type == "canopy_cover"]
     latest_canopy = canopy_vals[-1] if canopy_vals else 78.5
     carbon_vals = [m.value for m in metrics if m.metric_type == "carbon_tons"]
     latest_carbon = carbon_vals[-1] if carbon_vals else 1250.0
 
-    if "alert" in msg_lower or "risk" in msg_lower or "degrad" in msg_lower:
+    # Greetings & casual hellos
+    if msg_lower in ["hi", "hello", "hey", "greetings", "mm", "help"]:
+        return (
+            f"Hello! I am monitoring telemetry for '{site.name}' ({site_type_str} ecosystem, {site.area_hectares or 0.0} ha). "
+            f"You can ask me about canopy density, degradation alerts, carbon estimates, or site health."
+        )
+
+    # Comparison intent
+    if "compare" in msg_lower or "versus" in msg_lower or "vs" in msg_lower:
+        return (
+            f"Site '{site.name}' currently has {latest_canopy}% canopy density, {latest_carbon} tonnes stored carbon, and {len(alerts)} active alert(s). "
+            f"To compare multiple sites side-by-side on a matrix table, click the 'Compare Sites' button in the Projects directory."
+        )
+
+    # Alerts & Degradation
+    if "alert" in msg_lower or "risk" in msg_lower or "degrad" in msg_lower or "warning" in msg_lower:
         if alerts:
             alert_msgs = "; ".join(
                 [f"WARNING: {a.get('message', '')}" for a in alerts[:2]]
             )
-            return f"Site '{site.name}' currently has {len(alerts)} active degradation alert(s): {alert_msgs}. Immediate canopy monitoring is recommended."
+            return f"Site '{site.name}' currently has {len(alerts)} active degradation alert(s): {alert_msgs}. Immediate field verification is recommended."
         return f"Site '{site.name}' currently has 0 active degradation alerts. Satellite telemetry indicates stable canopy cover ({latest_canopy}%)."
 
-    if "carbon" in msg_lower or "stock" in msg_lower:
-        return f"Site '{site.name}' holds an estimated {latest_carbon} tonnes of stored carbon across {site.area_hectares or 0.0} hectares under {site.site_type} classification."
+    # Carbon Stock
+    if "carbon" in msg_lower or "stock" in msg_lower or "tonnes" in msg_lower:
+        return f"Site '{site.name}' holds an estimated {latest_carbon} tonnes of stored carbon across {site.area_hectares or 0.0} hectares under {site_type_str} classification."
 
-    if "canopy" in msg_lower or "ndvi" in msg_lower or "health" in msg_lower:
-        return f"Current canopy cover density for '{site.name}' is {latest_canopy}% ({site.site_type} ecosystem). Time-series telemetry shows expected seasonal stability."
+    # Canopy & Health
+    if "canopy" in msg_lower or "ndvi" in msg_lower or "health" in msg_lower or "status" in msg_lower:
+        return f"Current canopy cover density for '{site.name}' is {latest_canopy}% ({site_type_str} ecosystem). Time-series telemetry shows expected seasonal stability."
+
+    # Surface Area
+    if "area" in msg_lower or "hectare" in msg_lower or "size" in msg_lower:
+        return f"Site '{site.name}' covers a surface area of {site.area_hectares or 0.0} hectares ({site_type_str} classification) mapped via EPSG:4326 GeoJSON boundary polygon."
 
     return (
-        f"Site '{site.name}' covers {site.area_hectares or 0.0} hectares under {site.site_type} classification. "
+        f"Site '{site.name}' covers {site.area_hectares or 0.0} hectares under {site_type_str} classification. "
         f"Latest canopy density is {latest_canopy}% with {len(alerts)} active degradation alert(s). "
         f"Field monitoring operations are proceeding as scheduled."
     )
