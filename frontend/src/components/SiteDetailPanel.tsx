@@ -181,9 +181,10 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
           transition: 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Printable Executive PDF Header (Only visible during window.print()) */}
-        <div className="hidden print:block p-6 border-b-2 border-slate-900 bg-white">
-          <div className="flex justify-between items-start mb-4">
+        {/* Printable Executive Single-Page PDF Report (Only visible during window.print()) */}
+        <div className="hidden print:block p-6 bg-white space-y-4">
+          {/* Header Bar */}
+          <div className="flex justify-between items-start pb-4 border-b-2 border-slate-900">
             <div>
               <div className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                 <Trees className="w-6 h-6 text-emerald-600" />
@@ -203,7 +204,8 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+          {/* Site Identity Block */}
+          <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200 text-xs">
             <div>
               <span className="text-slate-500 block">Site Name:</span>
               <strong className="text-slate-900 text-sm">{site.name}</strong>
@@ -230,6 +232,44 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                 {site.area_hectares} ha ({centroidLat}° N, {centroidLng}° E)
               </span>
             </div>
+          </div>
+
+          {/* Active Alerts (if any) */}
+          {siteAlerts.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-rose-700">Active Degradation Alerts ({siteAlerts.length})</h4>
+              {siteAlerts.map((a, i) => (
+                <div key={i} className="p-3 bg-rose-50 border border-rose-200 rounded text-xs text-rose-800">
+                  <strong>{a.metric_type.toUpperCase()} drop detected:</strong> {a.message} ({a.recorded_at})
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Surface Area & Spatial Metadata Cards */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 border border-slate-200 rounded-lg bg-white">
+              <div className="text-xs font-semibold text-slate-500 uppercase">Surface Area</div>
+              <div className="text-xl font-bold font-mono text-slate-800 mt-1">{site.area_hectares != null ? `${site.area_hectares} ha` : 'N/A'}</div>
+            </div>
+            <div className="p-4 border border-slate-200 rounded-lg bg-white">
+              <div className="text-xs font-semibold text-slate-500 uppercase">Centroid Lat / Lng</div>
+              <div className="text-xs font-bold font-mono text-slate-800 mt-2">{centroidLat}° N, {centroidLng}° E</div>
+            </div>
+          </div>
+
+          <div className="p-4 border border-slate-200 rounded-lg bg-white text-xs space-y-2">
+            <div className="font-bold text-slate-800 border-b border-slate-200 pb-1">Spatial Polygon Metadata</div>
+            <div className="flex justify-between text-slate-600"><span>Geometry Type</span><span className="font-mono">GeoJSON Polygon</span></div>
+            <div className="flex justify-between text-slate-600"><span>SRID Reference</span><span className="font-mono">EPSG:4326 (WGS84)</span></div>
+            <div className="flex justify-between text-slate-600"><span>Boundary Vertex Count</span><span className="font-mono">{vertexCount} vertices</span></div>
+            {site.created_at && <div className="flex justify-between text-slate-600"><span>Mapped Timestamp</span><span>{new Date(site.created_at).toLocaleDateString()}</span></div>}
+          </div>
+
+          {/* Footer */}
+          <div className="pt-4 border-t border-slate-200 flex justify-between text-xs text-slate-400">
+            <span>Darukaa.Earth Planetary Intelligence Assessment</span>
+            <span>Page 1 of 1</span>
           </div>
         </div>
 
@@ -444,7 +484,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
         </div>
 
         {/* Content Body */}
-        <div style={{ padding: '20px', flex: 1, overflowY: 'auto' }}>
+        <div className="print:hidden" style={{ padding: '20px', flex: 1, overflowY: 'auto' }}>
           {/* Active Alerts Banner */}
           <AlertBanner alerts={siteAlerts} />
 

@@ -453,7 +453,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
       {/* Floating Top Control Toolbar */}
       <div
-        className="card-container"
+        className="card-container print:hidden"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
@@ -597,7 +597,7 @@ export const MapView: React.FC<MapViewProps> = ({
       {/* Floating Drawing Mode Helper Banner */}
       {isDrawing && !drawnGeoJSON && (
         <div
-          className="font-mono"
+          className="font-mono print:hidden"
           style={{
             position: 'absolute',
             top: '60px',
@@ -632,7 +632,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
       {/* Floating Bottom-Right Coordinate & Viewport HUD */}
       <div
-        className="card-container font-mono"
+        className="card-container font-mono print:hidden"
         style={{
           position: 'absolute',
           bottom: '16px',
