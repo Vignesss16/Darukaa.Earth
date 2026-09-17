@@ -283,7 +283,12 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <button
-                onClick={() => setDigestModalOpen(true)}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setDigestModalOpen(true);
+                }}
                 className="btn-secondary"
                 style={{
                   height: '28px',
@@ -292,6 +297,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
+                  cursor: 'pointer',
                 }}
                 title="Preview Email Alert Digest"
               >
@@ -669,39 +675,120 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
 
           {/* AI Assistant Tab */}
           {activeTab === 'assistant' && (
-            <div className="flex flex-col h-[400px] border border-slate-200 rounded-lg bg-slate-50/50 overflow-hidden">
-              <div className="p-3 bg-white border-b border-slate-200 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                  <Bot className="w-4 h-4 text-emerald-600" />
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '420px',
+                border: '1px solid #E2E8F0',
+                borderRadius: '8px',
+                backgroundColor: '#F8FAFC',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#FFFFFF',
+                  borderBottom: '1px solid #E2E8F0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: '#0F172A',
+                  }}
+                >
+                  <Bot size={15} color="#059669" />
                   <span>Ask about this site</span>
                 </div>
-                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    color: '#047857',
+                    backgroundColor: '#ECFDF5',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #A7F3D0',
+                  }}
+                >
                   Groq LLM Scoped
                 </span>
               </div>
 
               {/* Chat Thread */}
-              <div className="flex-1 p-3 overflow-y-auto space-y-3 text-xs">
+              <div
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  fontSize: '12px',
+                }}
+              >
                 {chatMessages.map((msg, idx) => (
                   <div
                     key={idx}
-                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    style={{
+                      display: 'flex',
+                      justifyContent:
+                        msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                    }}
                   >
                     <div
-                      className={`max-w-[85%] p-2.5 rounded-lg text-xs leading-relaxed ${
-                        msg.sender === 'user'
-                          ? 'bg-emerald-600 text-white font-medium rounded-br-none shadow-sm'
-                          : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm'
-                      }`}
+                      style={{
+                        maxWidth: '85%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        lineHeight: '1.5',
+                        backgroundColor:
+                          msg.sender === 'user' ? '#059669' : '#FFFFFF',
+                        color: msg.sender === 'user' ? '#FFFFFF' : '#0F172A',
+                        border:
+                          msg.sender === 'user'
+                            ? 'none'
+                            : '1px solid #E2E8F0',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                      }}
                     >
                       {msg.text}
                     </div>
                   </div>
                 ))}
                 {chatLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border border-slate-200 p-2.5 rounded-lg text-xs text-slate-400 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                    <div
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E2E8F0',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        color: '#64748B',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '8px',
+                          height: '8px',
+                          backgroundColor: '#10B981',
+                          borderRadius: '50%',
+                        }}
+                      />
                       Analyzing site telemetry context...
                     </div>
                   </div>
@@ -709,14 +796,31 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
               </div>
 
               {/* Disclaimer Microcopy */}
-              <div className="px-3 py-1 bg-amber-50/70 border-t border-amber-100 text-[10px] text-amber-800 font-medium text-center">
+              <div
+                style={{
+                  padding: '4px 10px',
+                  backgroundColor: '#FFFBEB',
+                  borderTop: '1px solid #FEF3C7',
+                  fontSize: '10px',
+                  color: '#92400E',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                }}
+              >
                 AI-generated, verify independently.
               </div>
 
               {/* Chat Input Form */}
               <form
                 onSubmit={handleSendChatMessage}
-                className="p-2 bg-white border-t border-slate-200 flex items-center gap-2"
+                style={{
+                  padding: '8px 10px',
+                  backgroundColor: '#FFFFFF',
+                  borderTop: '1px solid #E2E8F0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
               >
                 <input
                   type="text"
@@ -724,14 +828,32 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                   onChange={(e) => setInputMsg(e.target.value)}
                   placeholder={`Ask questions about ${site.name}...`}
                   disabled={chatLoading}
-                  className="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '12px',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '6px',
+                    outline: 'none',
+                  }}
                 />
                 <button
                   type="submit"
                   disabled={!inputMsg.trim() || chatLoading}
-                  className="p-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                  style={{
+                    padding: '6px 12px',
+                    backgroundColor: '#059669',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    opacity: !inputMsg.trim() || chatLoading ? 0.5 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send size={13} />
                 </button>
               </form>
             </div>

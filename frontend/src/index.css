@@ -270,3 +270,47 @@ textarea {
 ::-webkit-scrollbar-thumb {
   background: var(--color-line-dark);
 }
+
+/* Executive Single-Page Print Report Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  body,
+  html,
+  #root {
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+    width: 100% !important;
+  }
+
+  /* Hide app navigation shell, sidebar, header, map canvas, and buttons during print */
+  aside,
+  header,
+  nav,
+  .print\:hidden,
+  .mapboxgl-map,
+  .mapboxgl-control-container,
+  button {
+    display: none !important;
+  }
+
+  /* Expand printable site panel to full printable page */
+  .printable-site-panel {
+    position: static !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+    background: #ffffff !important;
+  }
+}
+
