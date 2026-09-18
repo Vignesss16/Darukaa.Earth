@@ -18,6 +18,7 @@ interface DashboardViewProps {
   onNavigateTab: (tab: 'map' | 'projects' | 'activity') => void;
   userRole?: UserRole;
   searchQuery?: string;
+  isLoading?: boolean;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -26,6 +27,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onSelectSiteOnMap,
   onNavigateTab,
   searchQuery = '',
+  isLoading = false,
 }) => {
   // Filter sites if search query active (matches site name, classification, or project name)
   const filteredSites = sites.filter((s) => {
@@ -448,7 +450,49 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {filteredSites.length === 0 ? (
+                {isLoading ? (
+                  [1, 2, 3, 4, 5].map((idx) => (
+                    <tr
+                      key={idx}
+                      style={{ borderBottom: '1px solid var(--color-line)' }}
+                    >
+                      <td style={{ padding: '12px 14px' }}>
+                        <div
+                          className="skeleton-pulse"
+                          style={{ width: '130px', height: '15px' }}
+                        />
+                      </td>
+                      <td style={{ padding: '12px 14px' }}>
+                        <div
+                          className="skeleton-pulse"
+                          style={{
+                            width: '60px',
+                            height: '18px',
+                            borderRadius: '12px',
+                          }}
+                        />
+                      </td>
+                      <td style={{ padding: '12px 14px' }}>
+                        <div
+                          className="skeleton-pulse"
+                          style={{ width: '170px', height: '14px' }}
+                        />
+                      </td>
+                      <td style={{ padding: '12px 14px' }}>
+                        <div
+                          className="skeleton-pulse"
+                          style={{ width: '75px', height: '14px' }}
+                        />
+                      </td>
+                      <td style={{ padding: '12px 14px' }}>
+                        <div
+                          className="skeleton-pulse"
+                          style={{ width: '90px', height: '24px' }}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : filteredSites.length === 0 ? (
                   <tr>
                     <td
                       colSpan={5}

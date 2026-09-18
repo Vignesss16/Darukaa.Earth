@@ -485,3 +485,26 @@ textarea {
     page-break-inside: avoid !important;
   }
 }
+
+/* Skeleton Shimmer Loading Utility */
+@keyframes skeleton-shimmer {
+  0% {
+    background-color: #e2e8f0;
+    opacity: 0.6;
+  }
+  50% {
+    background-color: #f1f5f9;
+    opacity: 1;
+  }
+  100% {
+    background-color: #e2e8f0;
+    opacity: 0.6;
+  }
+}
+
+.skeleton-pulse {
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  pointer-events: none;
+  user-select: none;
+}

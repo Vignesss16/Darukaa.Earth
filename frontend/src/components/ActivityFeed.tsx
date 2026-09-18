@@ -91,24 +91,46 @@ export const ActivityFeed: React.FC = () => {
 
       {/* Loading Skeleton */}
       {loading && (
-        <div style={{ padding: '32px', textAlign: 'center' }}>
-          <Activity
-            size={24}
-            color="var(--color-canopy)"
-            style={{
-              animation: 'spin 1.5s linear infinite',
-              marginBottom: '12px',
-            }}
-          />
-          <div
-            style={{
-              fontSize: '13px',
-              color: 'var(--color-ink)',
-              opacity: 0.7,
-            }}
-          >
-            Loading recent operations log...
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[1, 2, 3, 4].map((idx) => (
+            <div
+              key={idx}
+              className="card-container"
+              style={{
+                padding: '16px',
+                backgroundColor: '#FFFFFF',
+                borderRadius: '10px',
+                border: '1px solid #E2E8F0',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center',
+              }}
+            >
+              <div
+                className="skeleton-pulse"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ flex: 1 }}>
+                <div
+                  className="skeleton-pulse"
+                  style={{
+                    width: '60%',
+                    height: '14px',
+                    marginBottom: '8px',
+                  }}
+                />
+                <div
+                  className="skeleton-pulse"
+                  style={{ width: '40%', height: '12px' }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

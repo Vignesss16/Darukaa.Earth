@@ -11,6 +11,7 @@ interface ProjectTableProps {
   onOpenExportSummary?: (project: Project) => void;
   userRole?: UserRole;
   searchQuery?: string;
+  isLoading?: boolean;
 }
 
 export const ProjectTable: React.FC<ProjectTableProps> = ({
@@ -21,6 +22,7 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
   onOpenExportSummary,
   userRole,
   searchQuery = '',
+  isLoading = false,
 }) => {
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'active' | 'archived'
@@ -185,7 +187,67 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.length === 0 ? (
+            {isLoading ? (
+              [1, 2, 3, 4].map((idx) => (
+                <tr
+                  key={idx}
+                  style={{ borderBottom: '1px solid var(--color-line)' }}
+                >
+                  <td style={{ padding: '14px 16px' }}>
+                    <div
+                      className="skeleton-pulse"
+                      style={{
+                        width: '180px',
+                        height: '16px',
+                        marginBottom: '6px',
+                      }}
+                    />
+                    <div
+                      className="skeleton-pulse"
+                      style={{ width: '240px', height: '12px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div
+                      className="skeleton-pulse"
+                      style={{
+                        width: '64px',
+                        height: '18px',
+                        borderRadius: '12px',
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div
+                      className="skeleton-pulse"
+                      style={{ width: '70px', height: '14px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div
+                      className="skeleton-pulse"
+                      style={{ width: '90px', height: '14px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div
+                      className="skeleton-pulse"
+                      style={{ width: '80px', height: '12px' }}
+                    />
+                  </td>
+                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    <div
+                      className="skeleton-pulse"
+                      style={{
+                        width: '100px',
+                        height: '26px',
+                        marginLeft: 'auto',
+                      }}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : filteredProjects.length === 0 ? (
               <tr>
                 <td
                   colSpan={6}

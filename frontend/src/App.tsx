@@ -54,6 +54,7 @@ export const App: React.FC = () => {
   );
 
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [loadingData, setLoadingData] = useState<boolean>(true);
 
   // Enhancement Modals State
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
@@ -90,6 +91,7 @@ export const App: React.FC = () => {
   }, []);
 
   const loadData = async () => {
+    setLoadingData(true);
     try {
       const projList = await api.projects.list();
       setProjects(projList);
@@ -108,6 +110,8 @@ export const App: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to load initial data:', err);
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -350,6 +354,7 @@ export const App: React.FC = () => {
               onNavigateTab={setCurrentTab}
               userRole={currentUser?.role}
               searchQuery={searchQuery}
+              isLoading={loadingData}
             />
           ) : currentTab === 'map' ? (
             <div
@@ -394,6 +399,7 @@ export const App: React.FC = () => {
               onOpenExportSummary={(proj) => setExportProject(proj)}
               userRole={currentUser?.role}
               searchQuery={searchQuery}
+              isLoading={loadingData}
             />
           ) : (
             <ActivityFeed />
