@@ -39,6 +39,13 @@ export interface GeoJSONPolygon {
   coordinates: number[][][];
 }
 
+export interface GeoJSONMultiPolygon {
+  type: 'MultiPolygon';
+  coordinates: number[][][][];
+}
+
+export type GeoJSONGeometry = GeoJSONPolygon | GeoJSONMultiPolygon;
+
 export interface Site {
   id: number;
   project_id: number;

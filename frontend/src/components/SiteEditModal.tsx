@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Site, SiteType, GeoJSONPolygon, User } from '../types';
+import { Site, SiteType, GeoJSONPolygon, GeoJSONGeometry, User } from '../types';
 import {
   X,
   Pencil,
@@ -64,19 +64,20 @@ export const SiteEditModal: React.FC<SiteEditModalProps> = ({
         const text = event.target?.result as string;
         const parsed = JSON.parse(text);
 
-        let rawGeom: { type?: string; coordinates?: unknown } | null = null;
+        let rawGeom: GeoJSONGeometry | null = null;
         if (
           parsed.type === 'FeatureCollection' &&
-          parsed.features?.length > 0
+          Array.isArray(parsed.features) &&
+          parsed.features.length > 0
         ) {
-          rawGeom = parsed.features[0].geometry;
+          rawGeom = parsed.features[0].geometry as GeoJSONGeometry;
         } else if (parsed.type === 'Feature') {
-          rawGeom = parsed.geometry;
+          rawGeom = parsed.geometry as GeoJSONGeometry;
         } else if (
           parsed.type === 'Polygon' ||
           parsed.type === 'MultiPolygon'
         ) {
-          rawGeom = parsed;
+          rawGeom = parsed as GeoJSONGeometry;
         }
 
         if (
@@ -89,14 +90,17 @@ export const SiteEditModal: React.FC<SiteEditModalProps> = ({
         let finalPolygon: GeoJSONPolygon;
         if (
           rawGeom.type === 'MultiPolygon' &&
-          rawGeom.coordinates?.length > 0
+          Array.isArray(rawGeom.coordinates) &&
+          rawGeom.coordinates.length > 0
         ) {
           finalPolygon = {
             type: 'Polygon',
             coordinates: rawGeom.coordinates[0],
           };
+        } else if (rawGeom.type === 'Polygon') {
+          finalPolygon = rawGeom;
         } else {
-          finalPolygon = rawGeom as GeoJSONPolygon;
+          throw new Error('File does not contain a valid GeoJSON Polygon.');
         }
 
         setReplacementGeoJSON(finalPolygon);

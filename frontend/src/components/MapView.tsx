@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { Site, GeoJSONPolygon, UserRole } from '../types';
+import { Site, GeoJSONPolygon, GeoJSONGeometry, UserRole } from '../types';
 import {
   Trash2,
   MapPin,
@@ -307,27 +307,31 @@ export const MapView: React.FC<MapViewProps> = ({
     const map = mapRef.current;
     if (!map) return;
 
-    let geom: { type?: string; coordinates?: unknown } | null =
-      (siteToZoom.geojson as unknown as {
-        type?: string;
-        coordinates?: unknown;
-      }) || null;
-    if (typeof geom === 'string') {
+    let geom: GeoJSONGeometry | null = null;
+    if (typeof siteToZoom.geojson === 'string') {
       try {
-        geom = JSON.parse(geom);
+        geom = JSON.parse(siteToZoom.geojson as unknown as string) as GeoJSONGeometry;
       } catch {
         geom = null;
       }
+    } else {
+      geom = siteToZoom.geojson as GeoJSONGeometry;
     }
     if (!geom || !geom.coordinates) return;
 
     let rawCoords: number[][] = [];
-    if (geom.type === 'Polygon' && Array.isArray(geom.coordinates[0])) {
+    if (
+      geom.type === 'Polygon' &&
+      Array.isArray(geom.coordinates) &&
+      geom.coordinates.length > 0
+    ) {
       rawCoords = geom.coordinates[0];
     } else if (
       geom.type === 'MultiPolygon' &&
+      Array.isArray(geom.coordinates) &&
+      geom.coordinates.length > 0 &&
       Array.isArray(geom.coordinates[0]) &&
-      Array.isArray(geom.coordinates[0][0])
+      geom.coordinates[0].length > 0
     ) {
       rawCoords = geom.coordinates[0][0];
     }
@@ -415,21 +419,19 @@ export const MapView: React.FC<MapViewProps> = ({
       type: 'FeatureCollection',
       features: filteredSites
         .map((site) => {
-          let geom: { type?: string; coordinates?: unknown } | null =
-            (site.geojson as unknown as {
-              type?: string;
-              coordinates?: unknown;
-            }) || null;
-          if (typeof geom === 'string') {
+          let geom: GeoJSONGeometry | null = null;
+          if (typeof site.geojson === 'string') {
             try {
-              geom = JSON.parse(geom);
+              geom = JSON.parse(site.geojson as unknown as string) as GeoJSONGeometry;
             } catch {
               geom = null;
             }
+          } else {
+            geom = site.geojson as GeoJSONGeometry;
           }
           if (!geom || !geom.type || !geom.coordinates) return null;
           return {
-            type: 'Feature',
+            type: 'Feature' as const,
             id: site.id,
             properties: {
               id: site.id,
@@ -438,10 +440,10 @@ export const MapView: React.FC<MapViewProps> = ({
               area_hectares: site.area_hectares,
               isSelected: currentSelected?.id === site.id,
             },
-            geometry: geom,
+            geometry: geom as unknown as GeoJSON.Geometry,
           };
         })
-        .filter(Boolean) as unknown as GeoJSON.Feature[],
+        .filter(Boolean) as GeoJSON.Feature[],
     };
 
     try {
@@ -769,23 +771,30 @@ export const MapView: React.FC<MapViewProps> = ({
 
     const allCoords: [number, number][] = [];
     sites.forEach((site) => {
-      let geom: { type?: string; coordinates?: unknown } | null =
-        (site.geojson as unknown as { type?: string; coordinates?: unknown }) ||
-        null;
-      if (typeof geom === 'string') {
+      let geom: GeoJSONGeometry | null = null;
+      if (typeof site.geojson === 'string') {
         try {
-          geom = JSON.parse(geom);
+          geom = JSON.parse(site.geojson as unknown as string) as GeoJSONGeometry;
         } catch {
           geom = null;
         }
+      } else {
+        geom = site.geojson as GeoJSONGeometry;
       }
       if (geom && geom.coordinates) {
         let raw: number[][] = [];
-        if (geom.type === 'Polygon' && Array.isArray(geom.coordinates[0])) {
+        if (
+          geom.type === 'Polygon' &&
+          Array.isArray(geom.coordinates) &&
+          geom.coordinates.length > 0
+        ) {
           raw = geom.coordinates[0];
         } else if (
           geom.type === 'MultiPolygon' &&
-          Array.isArray(geom.coordinates[0]?.[0])
+          Array.isArray(geom.coordinates) &&
+          geom.coordinates.length > 0 &&
+          Array.isArray(geom.coordinates[0]) &&
+          geom.coordinates[0].length > 0
         ) {
           raw = geom.coordinates[0][0];
         }
