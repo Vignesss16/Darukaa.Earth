@@ -151,41 +151,56 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </span>
             <Globe size={16} color="var(--color-teal)" />
           </div>
-          <div
-            className="font-mono"
-            style={{
-              fontSize: '24px',
-              fontWeight: 600,
-              color: 'var(--color-ink)',
-            }}
-          >
-            {totalHectares.toLocaleString()}{' '}
-            <span
-              style={{
-                fontSize: '13px',
-                fontWeight: 400,
-                color: 'var(--color-ink-muted)',
-              }}
-            >
-              ha
-            </span>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginTop: '10px',
-              fontSize: '11px',
-            }}
-          >
-            <span className="badge badge-emerald">
-              <TrendingUp size={10} /> +14.2% YoY
-            </span>
-            <span style={{ color: 'var(--color-ink-muted)' }}>
-              across {totalProjects} active projects
-            </span>
-          </div>
+          {isLoading ? (
+            <>
+              <div
+                className="skeleton-pulse"
+                style={{ width: '130px', height: '24px', margin: '4px 0' }}
+              />
+              <div
+                className="skeleton-pulse"
+                style={{ width: '170px', height: '16px', marginTop: '10px' }}
+              />
+            </>
+          ) : (
+            <>
+              <div
+                className="font-mono"
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: 'var(--color-ink)',
+                }}
+              >
+                {totalHectares.toLocaleString()}{' '}
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    color: 'var(--color-ink-muted)',
+                  }}
+                >
+                  ha
+                </span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '10px',
+                  fontSize: '11px',
+                }}
+              >
+                <span className="badge badge-emerald">
+                  <TrendingUp size={10} /> +14.2% YoY
+                </span>
+                <span style={{ color: 'var(--color-ink-muted)' }}>
+                  across {totalProjects} active projects
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Metric 2: Active Conservation Sites */}
@@ -218,39 +233,54 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </span>
             <TreeDeciduous size={16} color="var(--color-canopy)" />
           </div>
-          <div
-            className="font-mono"
-            style={{
-              fontSize: '24px',
-              fontWeight: 600,
-              color: 'var(--color-ink)',
-            }}
-          >
-            {totalSites}{' '}
-            <span
-              style={{
-                fontSize: '13px',
-                fontWeight: 400,
-                color: 'var(--color-ink-muted)',
-              }}
-            >
-              polygons
-            </span>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginTop: '10px',
-              fontSize: '11px',
-            }}
-          >
-            <span className="badge badge-moss">{carbonCount} Carbon</span>
-            <span className="badge badge-teal">
-              {biodiversityCount} Biodiversity
-            </span>
-          </div>
+          {isLoading ? (
+            <>
+              <div
+                className="skeleton-pulse"
+                style={{ width: '100px', height: '24px', margin: '4px 0' }}
+              />
+              <div
+                className="skeleton-pulse"
+                style={{ width: '140px', height: '16px', marginTop: '10px' }}
+              />
+            </>
+          ) : (
+            <>
+              <div
+                className="font-mono"
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: 'var(--color-ink)',
+                }}
+              >
+                {totalSites}{' '}
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    color: 'var(--color-ink-muted)',
+                  }}
+                >
+                  polygons
+                </span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '10px',
+                  fontSize: '11px',
+                }}
+              >
+                <span className="badge badge-moss">{carbonCount} Carbon</span>
+                <span className="badge badge-teal">
+                  {biodiversityCount} Biodiversity
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Metric 3: Avg Canopy Health */}
@@ -283,39 +313,54 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </span>
             <CheckCircle2 size={16} color="#047857" />
           </div>
-          <div
-            className="font-mono"
-            style={{
-              fontSize: '24px',
-              fontWeight: 600,
-              color: 'var(--color-ink)',
-            }}
-          >
-            74.8%{' '}
-            <span
-              style={{
-                fontSize: '13px',
-                fontWeight: 400,
-                color: 'var(--color-ink-muted)',
-              }}
-            >
-              NDVI baseline
-            </span>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginTop: '10px',
-              fontSize: '11px',
-            }}
-          >
-            <span className="badge badge-emerald">Optimal Health</span>
-            <span style={{ color: 'var(--color-ink-muted)' }}>
-              Sentinel-2 imagery
-            </span>
-          </div>
+          {isLoading ? (
+            <>
+              <div
+                className="skeleton-pulse"
+                style={{ width: '110px', height: '24px', margin: '4px 0' }}
+              />
+              <div
+                className="skeleton-pulse"
+                style={{ width: '150px', height: '16px', marginTop: '10px' }}
+              />
+            </>
+          ) : (
+            <>
+              <div
+                className="font-mono"
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: 'var(--color-ink)',
+                }}
+              >
+                74.8%{' '}
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    color: 'var(--color-ink-muted)',
+                  }}
+                >
+                  NDVI baseline
+                </span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '10px',
+                  fontSize: '11px',
+                }}
+              >
+                <span className="badge badge-emerald">Optimal Health</span>
+                <span style={{ color: 'var(--color-ink-muted)' }}>
+                  Sentinel-2 imagery
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Metric 4: Degradation Alerts */}
@@ -348,38 +393,53 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </span>
             <AlertTriangle size={16} color="var(--color-clay)" />
           </div>
-          <div
-            className="font-mono"
-            style={{
-              fontSize: '24px',
-              fontWeight: 600,
-              color: 'var(--color-clay)',
-            }}
-          >
-            {alertSites.length > 0 ? alertSites.length : 1}{' '}
-            <span
-              style={{
-                fontSize: '13px',
-                fontWeight: 400,
-                color: 'var(--color-ink-muted)',
-              }}
-            >
-              flagged
-            </span>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginTop: '10px',
-              fontSize: '11px',
-            }}
-          >
-            <span className="badge badge-clay">
-              <ShieldAlert size={10} /> Needs Analyst Review
-            </span>
-          </div>
+          {isLoading ? (
+            <>
+              <div
+                className="skeleton-pulse"
+                style={{ width: '90px', height: '24px', margin: '4px 0' }}
+              />
+              <div
+                className="skeleton-pulse"
+                style={{ width: '130px', height: '16px', marginTop: '10px' }}
+              />
+            </>
+          ) : (
+            <>
+              <div
+                className="font-mono"
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: 'var(--color-clay)',
+                }}
+              >
+                {alertSites.length > 0 ? alertSites.length : 1}{' '}
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    color: 'var(--color-ink-muted)',
+                  }}
+                >
+                  flagged
+                </span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '10px',
+                  fontSize: '11px',
+                }}
+              >
+                <span className="badge badge-clay">
+                  <ShieldAlert size={10} /> Needs Analyst Review
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -611,120 +671,149 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Site Type Distribution
             </h2>
 
-            {/* Carbon */}
-            <div style={{ marginBottom: '14px' }}>
+            {isLoading ? (
               <div
                 style={{
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: '12px',
-                  marginBottom: '4px',
-                }}
-              >
-                <span style={{ fontWeight: 500 }}>Carbon Offset Sites</span>
-                <span
-                  className="font-mono"
-                  style={{ color: 'var(--color-ink-muted)' }}
-                >
-                  {totalSites
-                    ? Math.round((carbonCount / totalSites) * 100)
-                    : 0}
-                  %
-                </span>
-              </div>
-              <div
-                style={{
-                  height: '6px',
-                  backgroundColor: '#E2E8F0',
-                  borderRadius: '3px',
-                  overflow: 'hidden',
+                  flexDirection: 'column',
+                  gap: '16px',
                 }}
               >
                 <div
-                  style={{
-                    height: '100%',
-                    width: `${totalSites ? (carbonCount / totalSites) * 100 : 0}%`,
-                    backgroundColor: 'var(--color-canopy)',
-                  }}
+                  className="skeleton-pulse"
+                  style={{ width: '100%', height: '14px', borderRadius: '4px' }}
+                />
+                <div
+                  className="skeleton-pulse"
+                  style={{ width: '100%', height: '14px', borderRadius: '4px' }}
+                />
+                <div
+                  className="skeleton-pulse"
+                  style={{ width: '100%', height: '14px', borderRadius: '4px' }}
                 />
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Carbon */}
+                <div style={{ marginBottom: '14px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: '12px',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <span style={{ fontWeight: 500 }}>Carbon Offset Sites</span>
+                    <span
+                      className="font-mono"
+                      style={{ color: 'var(--color-ink-muted)' }}
+                    >
+                      {totalSites
+                        ? Math.round((carbonCount / totalSites) * 100)
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      height: '6px',
+                      backgroundColor: '#E2E8F0',
+                      borderRadius: '3px',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${totalSites ? (carbonCount / totalSites) * 100 : 0}%`,
+                        backgroundColor: 'var(--color-canopy)',
+                      }}
+                    />
+                  </div>
+                </div>
 
-            {/* Biodiversity */}
-            <div style={{ marginBottom: '14px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: '12px',
-                  marginBottom: '4px',
-                }}
-              >
-                <span style={{ fontWeight: 500 }}>Biodiversity Reserves</span>
-                <span
-                  className="font-mono"
-                  style={{ color: 'var(--color-ink-muted)' }}
-                >
-                  {totalSites
-                    ? Math.round((biodiversityCount / totalSites) * 100)
-                    : 0}
-                  %
-                </span>
-              </div>
-              <div
-                style={{
-                  height: '6px',
-                  backgroundColor: '#E2E8F0',
-                  borderRadius: '3px',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    height: '100%',
-                    width: `${totalSites ? (biodiversityCount / totalSites) * 100 : 0}%`,
-                    backgroundColor: 'var(--color-teal)',
-                  }}
-                />
-              </div>
-            </div>
+                {/* Biodiversity */}
+                <div style={{ marginBottom: '14px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: '12px',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <span style={{ fontWeight: 500 }}>
+                      Biodiversity Reserves
+                    </span>
+                    <span
+                      className="font-mono"
+                      style={{ color: 'var(--color-ink-muted)' }}
+                    >
+                      {totalSites
+                        ? Math.round((biodiversityCount / totalSites) * 100)
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      height: '6px',
+                      backgroundColor: '#E2E8F0',
+                      borderRadius: '3px',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${totalSites ? (biodiversityCount / totalSites) * 100 : 0}%`,
+                        backgroundColor: 'var(--color-teal)',
+                      }}
+                    />
+                  </div>
+                </div>
 
-            {/* Mixed */}
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: '12px',
-                  marginBottom: '4px',
-                }}
-              >
-                <span style={{ fontWeight: 500 }}>Mixed Conservation</span>
-                <span
-                  className="font-mono"
-                  style={{ color: 'var(--color-ink-muted)' }}
-                >
-                  {totalSites ? Math.round((mixedCount / totalSites) * 100) : 0}
-                  %
-                </span>
-              </div>
-              <div
-                style={{
-                  height: '6px',
-                  backgroundColor: '#E2E8F0',
-                  borderRadius: '3px',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    height: '100%',
-                    width: `${totalSites ? (mixedCount / totalSites) * 100 : 0}%`,
-                    backgroundColor: '#3d8b6f',
-                  }}
-                />
-              </div>
-            </div>
+                {/* Mixed */}
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: '12px',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <span style={{ fontWeight: 500 }}>Mixed Conservation</span>
+                    <span
+                      className="font-mono"
+                      style={{ color: 'var(--color-ink-muted)' }}
+                    >
+                      {totalSites
+                        ? Math.round((mixedCount / totalSites) * 100)
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      height: '6px',
+                      backgroundColor: '#E2E8F0',
+                      borderRadius: '3px',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${totalSites ? (mixedCount / totalSites) * 100 : 0}%`,
+                        backgroundColor: '#64748B',
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Quick Telemetry & Satellite Info */}
