@@ -243,12 +243,15 @@ export const App: React.FC = () => {
   };
 
   const handleSelectProjectOnMap = (projectId: number) => {
+    const proj = projects.find((p) => p.id === projectId);
     const firstSite = sites.find((s) => s.project_id === projectId);
-    localStorage.setItem('darukaa_current_tab', 'map');
-    if (firstSite) {
-      localStorage.setItem('darukaa_selected_site_id', String(firstSite.id));
+    if (proj) {
+      setSearchQuery(proj.name);
     }
-    window.location.reload();
+    if (firstSite) {
+      setSelectedSite(firstSite);
+    }
+    setCurrentTab('map');
   };
 
   const handleSelectSiteOnMap = (site: Site) => {
@@ -354,6 +357,7 @@ export const App: React.FC = () => {
             >
               <MapView
                 sites={sites}
+                projects={projects}
                 selectedSite={selectedSite}
                 onSelectSite={handleSelectSite}
                 onPolygonDrawn={setDrawnGeoJSON}
@@ -363,6 +367,7 @@ export const App: React.FC = () => {
                 drawnGeoJSON={drawnGeoJSON}
                 userRole={currentUser?.role}
                 searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
                 editingBoundarySite={editingBoundarySite}
                 onSaveEditedBoundary={handleSaveEditedBoundary}
                 onCancelEditBoundary={() => setEditingBoundarySite(null)}

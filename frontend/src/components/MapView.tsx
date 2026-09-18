@@ -1,19 +1,27 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { Site, GeoJSONPolygon, GeoJSONGeometry, UserRole } from '../types';
+import {
+  Site,
+  Project,
+  GeoJSONPolygon,
+  GeoJSONGeometry,
+  UserRole,
+} from '../types';
 import {
   Trash2,
   MapPin,
   Navigation,
   CheckCircle2,
   RefreshCw,
+  Folder,
 } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 interface MapViewProps {
   sites: Site[];
+  projects?: Project[];
   selectedSite: Site | null;
   onSelectSite: (site: Site) => void;
   onPolygonDrawn: (geojson: GeoJSONPolygon | null) => void;
@@ -23,6 +31,7 @@ interface MapViewProps {
   drawnGeoJSON: GeoJSONPolygon | null;
   userRole?: UserRole;
   searchQuery?: string;
+  onSearchChange?: (query: string) => void;
   editingBoundarySite?: Site | null;
   onSaveEditedBoundary?: (
     siteId: number,
@@ -247,6 +256,7 @@ const createDrawControl = () => {
 
 export const MapView: React.FC<MapViewProps> = ({
   sites,
+  projects = [],
   selectedSite,
   onSelectSite,
   onPolygonDrawn,
@@ -255,6 +265,7 @@ export const MapView: React.FC<MapViewProps> = ({
   setIsDrawing,
   drawnGeoJSON,
   searchQuery = '',
+  onSearchChange,
   editingBoundarySite,
   onSaveEditedBoundary,
   onCancelEditBoundary,
@@ -262,6 +273,11 @@ export const MapView: React.FC<MapViewProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
+
+  const projectsRef = useRef<Project[]>(projects);
+  useEffect(() => {
+    projectsRef.current = projects;
+  }, [projects]);
 
   const [mouseCoords, setMouseCoords] = useState<{
     lng: number;
@@ -409,11 +425,15 @@ export const MapView: React.FC<MapViewProps> = ({
       ? currentSites.filter((s) => s.id !== editingId)
       : currentSites;
     const filteredSites = trimmedQuery
-      ? availableSites.filter(
-          (s) =>
+      ? availableSites.filter((s) => {
+          const proj = projectsRef.current.find((p) => p.id === s.project_id);
+          const projName = proj?.name?.toLowerCase() || '';
+          return (
             s.name.toLowerCase().includes(trimmedQuery) ||
-            s.site_type.toLowerCase().includes(trimmedQuery)
-        )
+            s.site_type.toLowerCase().includes(trimmedQuery) ||
+            projName.includes(trimmedQuery)
+          );
+        })
       : availableSites;
 
     const currentSelected = selectedSiteRef.current;
@@ -1079,6 +1099,69 @@ export const MapView: React.FC<MapViewProps> = ({
               Outdoors
             </button>
           </div>
+
+          {projects.length > 0 && (
+            <>
+              <div
+                style={{
+                  height: '14px',
+                  width: '1px',
+                  backgroundColor: '#E2E8F0',
+                }}
+              />
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <Folder size={12} color="#2563EB" />
+                <select
+                  value={
+                    projects.find(
+                      (p) =>
+                        p.name.toLowerCase().trim() ===
+                        searchQuery.toLowerCase().trim()
+                    )?.id || ''
+                  }
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    if (!selectedId) {
+                      onSearchChange?.('');
+                    } else {
+                      const proj = projects.find(
+                        (p) => p.id === Number(selectedId)
+                      );
+                      if (proj) {
+                        onSearchChange?.(proj.name);
+                      }
+                    }
+                  }}
+                  style={{
+                    height: '22px',
+                    fontSize: '11px',
+                    padding: '0 6px',
+                    borderRadius: '4px',
+                    border: '1px solid #CBD5E1',
+                    backgroundColor: '#F8FAFC',
+                    color: '#0F172A',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                  title="Filter map polygons by project"
+                >
+                  <option value="">All Projects ({sites.length} sites)</option>
+                  {projects.map((p) => {
+                    const count = sites.filter(
+                      (s) => s.project_id === p.id
+                    ).length;
+                    return (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({count} {count === 1 ? 'site' : 'sites'})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Action States: Save Drawn Polygon or Cancel Drawing (ONLY when NOT editing boundary) */}

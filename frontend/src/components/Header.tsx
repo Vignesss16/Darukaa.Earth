@@ -109,11 +109,16 @@ export const Header: React.FC<HeaderProps> = ({
 
   const matchingSites = searchQuery.trim()
     ? sites
-        .filter(
-          (s) =>
-            s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.site_type.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        .filter((s) => {
+          const project = projects.find((p) => p.id === s.project_id);
+          const projName = project?.name || '';
+          const query = searchQuery.toLowerCase().trim();
+          return (
+            s.name.toLowerCase().includes(query) ||
+            s.site_type.toLowerCase().includes(query) ||
+            projName.toLowerCase().includes(query)
+          );
+        })
         .slice(0, 5)
     : [];
 
@@ -512,6 +517,7 @@ export const Header: React.FC<HeaderProps> = ({
                       key={project.id}
                       onClick={() => {
                         setIsDropdownOpen(false);
+                        onSearchChange(project.name);
                         onSelectProject?.(project.id);
                       }}
                       style={{

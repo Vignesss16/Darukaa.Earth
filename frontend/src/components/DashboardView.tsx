@@ -27,12 +27,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateTab,
   searchQuery = '',
 }) => {
-  // Filter sites if search query active
-  const filteredSites = sites.filter(
-    (s) =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.site_type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter sites if search query active (matches site name, classification, or project name)
+  const filteredSites = sites.filter((s) => {
+    const project = projects.find((p) => p.id === s.project_id);
+    const projName = project?.name || '';
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    return (
+      s.name.toLowerCase().includes(query) ||
+      s.site_type.toLowerCase().includes(query) ||
+      projName.toLowerCase().includes(query)
+    );
+  });
 
   // Calculate telemetry KPI metrics
   const totalSites = sites.length;
