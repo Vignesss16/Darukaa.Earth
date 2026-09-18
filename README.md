@@ -28,7 +28,20 @@
 - Track multidimensional telemetry metrics (NDVI, Canopy Density, Carbon Stock, Deforestation Area, Fire Incidents).
 - Detect vegetation degradation anomalies through automated consecutive reading change triggers (>10% drop).
 - Ingest historical sensor and Kaggle INPE datasets via an intelligent dynamic CSV mapping pipeline.
+- Engage **Darukaa Planetary AI**, an interactive copilot that renders inline telemetry charts, 4-stat analysis grids, and triggers executive PDF dossier exports directly within the chat interface.
 - Export executive 1-page compliance PDF reports and multi-site telemetry comparisons.
+
+---
+
+## 🤖 Darukaa Planetary AI — Scoped Environmental Copilot
+
+**Darukaa Planetary AI** is an advanced, context-aware copilot integrated directly into the Site Detail panel (`Ask AI` tab). Rather than acting as a simple text-generating bot, it functions as an **interactive operational copilot** tightly coupled with ground-truth site telemetry, PostGIS spatial queries, and compliance workflows:
+
+- 📊 **Inline Multi-Spectral Chart Generation**: Queries regarding trends or time-series data dynamically render **live Chart.js telemetry charts** directly inside the conversation stream.
+- ⚡ **Instant 4-Stat Telemetry Analysis Grids**: Prompts requesting an analysis, audit, or deep dive render a 4-stat metric grid (**Canopy Cover %**, **Carbon Biomass Stock**, **NDVI Score**, and **Active Alert Status**).
+- 🖨️ **Certified Executive PDF Dossier Export**: Prompting for a dossier or PDF report dynamically injects an **Export PDF Dossier** button, allowing operators to trigger 1-page print compliance reports instantly.
+- 🧠 **Contextually Scoped Ground-Truth Intelligence**: Powered by Groq LLM orchestration and strictly scoped to the selected site's boundary polygon, acreage, vegetation telemetry, and active degradation alerts.
+- 📐 **Dual Display Modes**: Seamlessly switches between a drawer slide-over panel view and a centered enlarged modal view with keyboard navigation (`Esc` shortcut).
 
 ---
 

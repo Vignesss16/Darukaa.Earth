@@ -816,7 +816,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
               }}
             />
           </div>
-          <div>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div
               style={{
                 fontSize: isEnlarged ? '14px' : '12px',
@@ -866,7 +866,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
               style={{
                 fontSize: isEnlarged ? '11px' : '10.5px',
                 color: '#64748B',
-                maxWidth: isEnlarged ? '620px' : '220px',
+                maxWidth: isEnlarged ? '620px' : '150px',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -880,7 +880,14 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            flexShrink: 0,
+          }}
+        >
           <button
             type="button"
             onClick={handleResetChat}
@@ -889,13 +896,14 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
-              padding: isEnlarged ? '4px 10px' : '3px 8px',
+              padding: isEnlarged ? '4px 10px' : '3px 7px',
               fontSize: isEnlarged ? '11.5px' : '11px',
               color: '#64748B',
               backgroundColor: '#FFFFFF',
               border: '1px solid #E2E8F0',
               borderRadius: '6px',
               cursor: 'pointer',
+              whiteSpace: 'nowrap',
             }}
             title="Reset chat to initial telemetry briefing"
           >
@@ -912,7 +920,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                padding: '3px 8px',
+                padding: '3px 7px',
                 fontSize: '11px',
                 color: '#0F172A',
                 backgroundColor: '#FFFFFF',
@@ -920,6 +928,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 500,
+                whiteSpace: 'nowrap',
               }}
               title="Enlarge chatbot to centered modal view"
             >
