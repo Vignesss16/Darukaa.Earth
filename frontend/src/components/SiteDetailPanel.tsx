@@ -784,6 +784,8 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: isEnlarged ? '12px' : '8px',
+            minWidth: 0,
+            flex: 1,
           }}
         >
           <div
@@ -872,6 +874,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
             alignItems: 'center',
             gap: '6px',
             flexShrink: 0,
+            marginLeft: '8px',
           }}
         >
           <button
