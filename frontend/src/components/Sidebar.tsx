@@ -143,8 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               padding: '8px 12px',
               borderRadius: '4px',
               border: 'none',
-              backgroundColor:
-                currentTab === 'map' ? '#F1F5F9' : 'transparent',
+              backgroundColor: currentTab === 'map' ? '#F1F5F9' : 'transparent',
               color:
                 currentTab === 'map'
                   ? 'var(--color-ink)'
@@ -321,4 +320,3 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </aside>
   );
 };
-

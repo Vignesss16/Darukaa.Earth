@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Site, SiteType, GeoJSONPolygon, GeoJSONGeometry, User } from '../types';
+import {
+  Site,
+  SiteType,
+  GeoJSONPolygon,
+  GeoJSONGeometry,
+  User,
+} from '../types';
 import {
   X,
   Pencil,
