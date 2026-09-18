@@ -2,7 +2,12 @@ export type UserRole = 'admin' | 'analyst' | 'viewer';
 export type ProjectStatus = 'active' | 'archived';
 export type SiteType = 'carbon' | 'biodiversity' | 'mixed';
 export type MetricType =
-  'ndvi' | 'canopy_cover' | 'carbon_tons' | 'biodiversity_index';
+  | 'ndvi'
+  | 'canopy_cover'
+  | 'carbon_tons'
+  | 'biodiversity_index'
+  | 'deforestation_area_km2'
+  | 'fire_incidents';
 
 export interface User {
   id: number;
@@ -42,6 +47,7 @@ export interface Site {
   site_type: SiteType;
   geojson: GeoJSONPolygon;
   created_at?: string;
+  created_by_id?: number;
 }
 
 export interface SiteMetric {
@@ -93,23 +99,35 @@ export interface SiteCompareResult {
 }
 
 export interface ProjectSummarySiteItem {
-  id: number;
+  site_id?: number;
+  id?: number;
   name: string;
   site_type: string;
   area_hectares: number;
-  alert_count: number;
+  active_alert_count?: number;
+  alert_count?: number;
   latest_canopy_cover: number | null;
+  latest_ndvi?: number | null;
+  health_status?: string;
 }
 
 export interface ProjectSummaryResult {
   project_id: number;
   project_name: string;
-  status: string;
+  description?: string;
+  status?: string;
   total_sites: number;
   total_area_hectares: number;
   total_active_alerts: number;
-  site_type_counts: Record<string, number>;
-  sites: ProjectSummarySiteItem[];
+  sites_by_classification?: Record<string, number>;
+  site_type_counts?: Record<string, number>;
+  site_summaries?: ProjectSummarySiteItem[];
+  sites?: ProjectSummarySiteItem[];
+}
+
+export interface ChatHistoryItem {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export interface AssistantChatResponse {

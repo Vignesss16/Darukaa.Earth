@@ -7,6 +7,7 @@ import {
   Upload,
   CheckCircle2,
   Layers,
+  Trash2,
 } from 'lucide-react';
 
 interface SiteFormModalProps {
@@ -21,6 +22,7 @@ interface SiteFormModalProps {
   ) => Promise<void>;
   onClose: () => void;
   onSuccessBulk?: () => void;
+  onDiscard?: () => void;
 }
 
 interface GeoJSONFeatureCollection {
@@ -34,6 +36,7 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
   onSaveSite,
   onClose,
   onSuccessBulk,
+  onDiscard,
 }) => {
   const [isNewProject, setIsNewProject] = useState<boolean>(
     projects.length === 0
@@ -53,10 +56,12 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const vertexCount =
-    drawnGeoJSON && drawnGeoJSON.coordinates && drawnGeoJSON.coordinates[0]
-      ? drawnGeoJSON.coordinates[0].length
-      : 0;
+  const rawCoords = drawnGeoJSON?.coordinates?.[0] || [];
+  const isClosed =
+    rawCoords.length > 3 &&
+    rawCoords[0][0] === rawCoords[rawCoords.length - 1][0] &&
+    rawCoords[0][1] === rawCoords[rawCoords.length - 1][1];
+  const vertexCount = isClosed ? rawCoords.length - 1 : rawCoords.length;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -194,11 +199,18 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
         name.trim() ||
         `Mapped Conservation Site #${Math.floor(1000 + Math.random() * 9000)}`;
 
+      const validSiteType: SiteType =
+        siteType === 'carbon' ||
+        siteType === 'biodiversity' ||
+        siteType === 'mixed'
+          ? siteType
+          : 'mixed';
+
       await onSaveSite(
         targetProjectId,
         null,
         finalSiteName,
-        siteType,
+        validSiteType,
         drawnGeoJSON
       );
       onClose();
@@ -219,12 +231,13 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(28, 43, 34, 0.4)',
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 100,
+        zIndex: 9999,
       }}
+      className="print:hidden backdrop-blur-sm"
     >
       <div
         className="card-container"
@@ -393,11 +406,15 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
                     fontSize: '13px',
                   }}
                 >
-                  <option value="carbon">Carbon Reserve</option>
-                  <option value="biodiversity">Biodiversity Habitat</option>
-                  <option value="mixed">Mixed Ecosystem</option>
-                  <option value="mangrove">Mangrove Restoration</option>
-                  <option value="reforestation">Reforestation Zone</option>
+                  <option value="carbon">
+                    Carbon Reserve (Forestry / Carbon Sink)
+                  </option>
+                  <option value="biodiversity">
+                    Biodiversity Habitat (Flora & Fauna)
+                  </option>
+                  <option value="mixed">
+                    Mixed Ecosystem (Reforestation / Agroforestry / Wetland)
+                  </option>
                 </select>
               </div>
             </>
@@ -484,28 +501,63 @@ export const SiteFormModal: React.FC<SiteFormModalProps> = ({
           )}
 
           <div
-            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: '8px',
+            }}
           >
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary"
-              style={{ height: '34px', fontSize: '12px' }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-primary"
-              style={{ height: '34px', fontSize: '12px' }}
-            >
-              {isSubmitting
-                ? 'Saving...'
-                : bulkFeatureCollection
-                  ? `Import ${bulkFeatureCollection.features.length} Sites`
-                  : 'Save Site Boundary'}
-            </button>
+            {drawnGeoJSON && onDiscard ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onDiscard();
+                  onClose();
+                }}
+                className="btn-secondary"
+                style={{
+                  height: '34px',
+                  fontSize: '12px',
+                  color: '#DC2626',
+                  borderColor: '#FCA5A5',
+                  backgroundColor: '#FEF2F2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '0 12px',
+                }}
+                title="Discard polygon and cancel saving"
+              >
+                <Trash2 size={13} />
+                Discard Polygon
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-secondary"
+                style={{ height: '34px', fontSize: '12px' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-primary"
+                style={{ height: '34px', fontSize: '12px' }}
+              >
+                {isSubmitting
+                  ? 'Saving...'
+                  : bulkFeatureCollection
+                    ? `Import ${bulkFeatureCollection.features.length} Sites`
+                    : 'Save Site Boundary'}
+              </button>
+            </div>
           </div>
         </form>
       </div>

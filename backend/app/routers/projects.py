@@ -234,10 +234,12 @@ def get_project_summary(
         site_summaries.append(
             ProjectSummarySiteItem(
                 site_id=s.id,
+                id=s.id,
                 name=s.name,
                 site_type=st_val,
                 area_hectares=s.area_hectares or 0.0,
                 active_alert_count=a_count,
+                alert_count=a_count,
                 latest_canopy_cover=canopy_metric.value if canopy_metric else None,
                 latest_ndvi=ndvi_metric.value if ndvi_metric else None,
                 health_status=health,
@@ -251,6 +253,8 @@ def get_project_summary(
         total_sites=len(sites),
         total_area_hectares=round(total_area, 2),
         sites_by_classification=classification_counts,
+        site_type_counts=classification_counts,
         total_active_alerts=total_alerts,
         site_summaries=site_summaries,
+        sites=site_summaries,
     )

@@ -74,13 +74,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(19, 27, 46, 0.45)',
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 200,
+        zIndex: 9999,
       }}
+      className="print:hidden"
     >
       <div
         className="card-container"

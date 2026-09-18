@@ -1,6 +1,12 @@
 import React from 'react';
 import { DegradationAlert, Site } from '../types';
-import { X, Mail, AlertTriangle, ShieldCheck, Info } from 'lucide-react';
+import {
+  X,
+  Mail,
+  ShieldCheck,
+  ArrowDownRight,
+  ShieldAlert,
+} from 'lucide-react';
 
 interface AlertDigestModalProps {
   site: Site | null;
@@ -19,138 +25,592 @@ export const AlertDigestModal: React.FC<AlertDigestModalProps> = ({
 }) => {
   if (!isOpen || !site) return null;
 
-  const subjectLine = `[Darukaa Alert Digest] Canopy Degradation Notice for ${site.name}`;
+  const subjectLine = `[Darukaa Degradation Notice] Critical Canopy Telemetry Alert: ${site.name}`;
   const currentDate = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
+    weekday: 'short',
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   });
 
   return (
-    <div className="fixed inset-0 z-[9999] print:hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 text-amber-700 rounded-lg">
-              <Mail className="w-5 h-5" />
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99999,
+        backgroundColor: 'rgba(15, 23, 42, 0.78)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        overflow: 'hidden',
+      }}
+      className="print:hidden"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundColor: '#FFFFFF',
+          color: '#0F172A',
+          width: '100%',
+          maxWidth: '640px',
+          maxHeight: 'min(88vh, 680px)',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: '16px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
+          border: '1px solid #CBD5E1',
+          overflow: 'hidden',
+          fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+          animation: 'modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
+        <style>{`
+          @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+        `}</style>
+        {/* Email App Header Chrome */}
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            padding: '12px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid #334155',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <span
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '9999px',
+                  backgroundColor: '#EF4444',
+                  display: 'inline-block',
+                }}
+              />
+              <span
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '9999px',
+                  backgroundColor: '#F59E0B',
+                  display: 'inline-block',
+                }}
+              />
+              <span
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '9999px',
+                  backgroundColor: '#10B981',
+                  display: 'inline-block',
+                }}
+              />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">
-                Alert Digest Email Preview
-              </h2>
-              <p className="text-xs text-slate-500">
-                Mocked email digest template for site monitoring alerts
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Mail size={16} color="#34D399" />
+              <span
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: '#FFFFFF',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                Automated Email Alert Digest
+              </span>
+              <span
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  color: '#6EE7B7',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                LIVE PREVIEW
+              </span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200/50 transition-colors"
+            style={{
+              padding: '4px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#94A3B8',
+              cursor: 'pointer',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            title="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Notice Banner */}
-        <div className="px-6 py-2.5 bg-amber-50 border-b border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
-          <Info className="w-4 h-4 text-amber-600 shrink-0" />
-          <span>
-            Preview only — email service delivery is not yet configured for live
-            sending.
-          </span>
-        </div>
-
-        {/* Email Header / Metadata */}
-        <div className="p-6 space-y-4 bg-slate-50/50 border-b border-slate-200 text-xs font-mono">
-          <div className="flex">
-            <span className="w-20 text-slate-400 font-semibold">To:</span>
-            <span className="text-slate-700">{userEmail}</span>
-          </div>
-          <div className="flex">
-            <span className="w-20 text-slate-400 font-semibold">From:</span>
-            <span className="text-slate-700">
-              alerts@darukaa.earth (Darukaa Automated Monitoring)
+        {/* Email Header Metadata */}
+        <div
+          style={{
+            backgroundColor: '#F8FAFC',
+            padding: '12px 20px',
+            borderBottom: '1px solid #E2E8F0',
+            fontSize: '11.5px',
+            lineHeight: 1.5,
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', marginBottom: '4px' }}>
+            <span
+              style={{
+                width: '65px',
+                fontWeight: 700,
+                color: '#64748B',
+                textTransform: 'uppercase',
+                fontSize: '9.5px',
+              }}
+            >
+              From:
+            </span>
+            <span style={{ fontWeight: 600, color: '#0F172A' }}>
+              Darukaa Telemetry Engine &lt;alerts@darukaa.earth&gt;
             </span>
           </div>
-          <div className="flex">
-            <span className="w-20 text-slate-400 font-semibold">Subject:</span>
-            <span className="text-slate-800 font-bold">{subjectLine}</span>
+          <div style={{ display: 'flex', marginBottom: '4px' }}>
+            <span
+              style={{
+                width: '65px',
+                fontWeight: 700,
+                color: '#64748B',
+                textTransform: 'uppercase',
+                fontSize: '9.5px',
+              }}
+            >
+              To:
+            </span>
+            <span
+              style={{
+                backgroundColor: '#E2E8F0',
+                padding: '1px 7px',
+                borderRadius: '4px',
+                fontWeight: 600,
+                color: '#334155',
+                fontFamily: 'monospace',
+                fontSize: '11px',
+              }}
+            >
+              {userEmail}
+            </span>
           </div>
-          <div className="flex">
-            <span className="w-20 text-slate-400 font-semibold">Date:</span>
-            <span className="text-slate-600">{currentDate}</span>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              paddingTop: '4px',
+              borderTop: '1px solid #E2E8F0',
+            }}
+          >
+            <span
+              style={{
+                width: '65px',
+                fontWeight: 700,
+                color: '#64748B',
+                textTransform: 'uppercase',
+                fontSize: '9.5px',
+              }}
+            >
+              Subject:
+            </span>
+            <span
+              style={{ fontWeight: 700, color: '#0F172A', fontSize: '12px' }}
+            >
+              {subjectLine}
+            </span>
           </div>
         </div>
 
-        {/* Email Content Body */}
-        <div className="p-6 space-y-4 text-sm text-slate-700">
-          <p>Hello Conservation Team,</p>
-          <p>
-            This automated alert digest summarizes recent telemetry anomalies
-            detected for conservation site{' '}
-            <strong className="text-slate-900">{site.name}</strong> (
-            {site.area_hectares || 0} ha, {site.site_type}).
-          </p>
-
-          {alerts.length > 0 ? (
-            <div className="space-y-3 my-4">
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Active Degradation Events ({alerts.length})
-              </h4>
-              {alerts.map((alert, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 bg-rose-50/80 border border-rose-200 rounded-lg space-y-2 text-xs"
+        {/* Email Body */}
+        <div
+          style={{
+            padding: '16px 20px',
+            backgroundColor: '#FFFFFF',
+            flex: 1,
+            overflowY: 'auto',
+          }}
+        >
+          {/* Site Overview Banner */}
+          <div
+            style={{
+              backgroundColor: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '24px',
+              boxShadow:
+                '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '12px',
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: '#64748B',
+                    fontWeight: 500,
+                  }}
                 >
-                  <div className="flex items-center justify-between font-semibold text-rose-800">
-                    <span className="flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-rose-600" />
-                      {alert.metric_type.toUpperCase()} Drop Detected
-                    </span>
-                    <span className="text-rose-600 font-mono">
-                      -{alert.drop_percentage.toFixed(1)}%
-                    </span>
+                  Monitored Conservation Site
+                </span>
+                <h4
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#0F172A',
+                    margin: '2px 0 0 0',
+                  }}
+                >
+                  {site.name}
+                </h4>
+              </div>
+              <span
+                style={{
+                  backgroundColor: '#ECFDF5',
+                  color: '#047857',
+                  border: '1px solid #A7F3D0',
+                  padding: '4px 12px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {site.site_type}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '12px',
+                paddingTop: '12px',
+                borderTop: '1px solid #E2E8F0',
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: '#64748B',
+                    display: 'block',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Surface Area
+                </span>
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#0F172A',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {site.area_hectares != null
+                    ? `${site.area_hectares.toFixed(2)} ha`
+                    : 'N/A'}
+                </span>
+              </div>
+              <div>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: '#64748B',
+                    display: 'block',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Degradation Events
+                </span>
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: alerts.length > 0 ? '#DC2626' : '#059669',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {alerts.length} Detected
+                </span>
+              </div>
+              <div>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: '#64748B',
+                    display: 'block',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Report Date
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#334155',
+                  }}
+                >
+                  {currentDate}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Alerts List */}
+          {alerts.length > 0 ? (
+            <div style={{ marginBottom: '20px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '12px',
+                }}
+              >
+                <ShieldAlert size={16} color="#DC2626" />
+                <h4
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: '#991B1B',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    margin: 0,
+                  }}
+                >
+                  Active Degradation Anomaly Logs ({alerts.length})
+                </h4>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                {alerts.map((alert, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      background: 'linear-gradient(to right, #FEF2F2, #FFF5F5)',
+                      border: '1px solid #FECACA',
+                      borderLeft: '4px solid #DC2626',
+                      borderRadius: '12px',
+                      padding: '18px',
+                      boxShadow: '0 2px 8px rgba(220, 38, 38, 0.05)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '10px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          color: '#991B1B',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          letterSpacing: '-0.01em',
+                        }}
+                      >
+                        <ArrowDownRight size={18} color="#DC2626" />
+                        {alert.metric_type.toUpperCase().replace('_', ' ')} DROP
+                        DETECTED
+                      </span>
+                      <span
+                        style={{
+                          background:
+                            'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                          color: '#991B1B',
+                          border: '1px solid #FCA5A5',
+                          padding: '4px 10px',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          fontFamily: 'monospace',
+                          boxShadow: '0 2px 4px rgba(220, 38, 38, 0.1)',
+                        }}
+                      >
+                        -{alert.drop_percentage.toFixed(1)}%
+                      </span>
+                    </div>
+
+                    <p
+                      style={{
+                        fontSize: '13px',
+                        color: '#7F1D1D',
+                        lineHeight: 1.6,
+                        margin: '0 0 14px 0',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {alert.message}
+                    </p>
+
+                    <div
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #FEE2E2',
+                        borderRadius: '10px',
+                        padding: '12px 16px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        fontSize: '12px',
+                        fontFamily: 'monospace',
+                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
+                      }}
+                    >
+                      <div>
+                        <span
+                          style={{
+                            color: '#64748B',
+                            display: 'block',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            letterSpacing: '0.05em',
+                          }}
+                        >
+                          BASELINE ({alert.previous_date}):
+                        </span>
+                        <strong style={{ color: '#0F172A', fontSize: '14px' }}>
+                          {alert.previous_value}
+                        </strong>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span
+                          style={{
+                            color: '#64748B',
+                            display: 'block',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            letterSpacing: '0.05em',
+                          }}
+                        >
+                          OBSERVED ({alert.recorded_at}):
+                        </span>
+                        <strong style={{ color: '#DC2626', fontSize: '14px' }}>
+                          {alert.current_value}
+                        </strong>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-slate-700 leading-relaxed">
-                    {alert.message}
-                  </p>
-                  <div className="flex justify-between text-slate-500 pt-1 border-t border-rose-200/60 font-mono">
-                    <span>
-                      Previous: {alert.previous_value} ({alert.previous_date})
-                    </span>
-                    <span>
-                      Current: {alert.current_value} ({alert.recorded_at})
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ) : (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg flex items-center gap-3 text-xs">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div
+              style={{
+                backgroundColor: '#ECFDF5',
+                border: '1px solid #A7F3D0',
+                borderRadius: '12px',
+                padding: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '20px',
+              }}
+            >
+              <ShieldCheck size={24} color="#059669" />
               <div>
-                <strong>No Active Degradation Alerts</strong>
-                <p className="text-emerald-700 mt-0.5">
-                  Satellite canopy cover and NDVI density remain stable within
-                  normal operating baseline threshold.
+                <strong style={{ color: '#065F46', fontSize: '13px' }}>
+                  Vegetation Baseline Healthy
+                </strong>
+                <p
+                  style={{
+                    color: '#047857',
+                    fontSize: '12px',
+                    margin: '2px 0 0 0',
+                  }}
+                >
+                  No canopy cover or NDVI vegetation drops detected. Ecosystem
+                  telemetry operates within normal baseline bounds.
                 </p>
               </div>
             </div>
           )}
 
-          <p className="text-xs text-slate-500 pt-2">
-            Please log in to the Darukaa.Earth dashboard to view high-resolution
-            GIS maps and initiate field verification workflows if required.
+          <p
+            style={{
+              fontSize: '11px',
+              color: '#64748B',
+              lineHeight: 1.5,
+              margin: 0,
+            }}
+          >
+            This email digest was automatically generated by Darukaa.Earth
+            Planetary Ops Engine. Log in to the console to initiate field team
+            verification.
           </p>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
+        <div
+          style={{
+            backgroundColor: '#F8FAFC',
+            padding: '12px 20px',
+            borderTop: '1px solid #E2E8F0',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 500 }}>
+            Darukaa.Earth Automated Monitoring Digest
+          </span>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors"
+            style={{
+              padding: '8px 18px',
+              backgroundColor: '#0F172A',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
           >
             Close Digest
           </button>

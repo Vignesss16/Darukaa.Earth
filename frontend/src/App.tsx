@@ -7,8 +7,10 @@ import { SiteDetailPanel } from './components/SiteDetailPanel';
 import { ProjectTable } from './components/ProjectTable';
 import { ActivityFeed } from './components/ActivityFeed';
 import { SiteFormModal } from './components/SiteFormModal';
+import { SiteEditModal } from './components/SiteEditModal';
 import { SiteCompareModal } from './components/SiteCompareModal';
 import { ProjectExportModal } from './components/ProjectExportModal';
+import { CreateProjectModal } from './components/CreateProjectModal';
 import { AuthModal } from './components/AuthModal';
 import {
   api,
@@ -28,7 +30,15 @@ import {
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
-  const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
+  const [currentTab, setCurrentTab] = useState<NavTab>(() => {
+    const saved = localStorage.getItem('darukaa_current_tab');
+    return saved === 'dashboard' ||
+      saved === 'map' ||
+      saved === 'projects' ||
+      saved === 'activity'
+      ? saved
+      : 'dashboard';
+  });
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
@@ -38,11 +48,28 @@ export const App: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [showSiteForm, setShowSiteForm] = useState<boolean>(false);
 
+  const [editingSite, setEditingSite] = useState<Site | null>(null);
+  const [editingBoundarySite, setEditingBoundarySite] = useState<Site | null>(
+    null
+  );
+
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Enhancement Modals State
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
   const [exportProject, setExportProject] = useState<Project | null>(null);
+  const [showCreateProjectModal, setShowCreateProjectModal] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    localStorage.setItem('darukaa_current_tab', currentTab);
+  }, [currentTab]);
+
+  useEffect(() => {
+    if (selectedSite) {
+      localStorage.setItem('darukaa_selected_site_id', String(selectedSite.id));
+    }
+  }, [selectedSite]);
 
   useEffect(() => {
     const { accessToken } = getStoredTokens();
@@ -68,7 +95,17 @@ export const App: React.FC = () => {
       setProjects(projList);
 
       const siteList = await api.sites.list();
+      const savedSiteId = localStorage.getItem('darukaa_selected_site_id');
+      const found =
+        savedSiteId && siteList.length > 0
+          ? siteList.find((s) => s.id === Number(savedSiteId)) || null
+          : null;
+
+      // Set sites and selectedSite simultaneously to avoid interim null selectedSite
       setSites(siteList);
+      if (found) {
+        setSelectedSite(found);
+      }
     } catch (err) {
       console.error('Failed to load initial data:', err);
     }
@@ -160,22 +197,95 @@ export const App: React.FC = () => {
     setProjects(updatedProjects);
   };
 
-  const handleSelectProjectOnMap = (projectId: number) => {
-    setCurrentTab('map');
-    const firstSite = sites.find((s) => s.project_id === projectId);
-    if (firstSite) {
-      setSelectedSite(firstSite);
+  const handleUpdateSite = async (
+    siteId: number,
+    data: { name?: string; site_type?: SiteType; geojson?: GeoJSONPolygon }
+  ) => {
+    const updated = await api.sites.update(siteId, data);
+    setSites((prev) => prev.map((s) => (s.id === siteId ? updated : s)));
+    if (selectedSite?.id === siteId) {
+      setSelectedSite(updated);
+    }
+    setEditingSite(null);
+  };
+
+  const handleSaveEditedBoundary = async (
+    siteId: number,
+    updatedGeoJSON: GeoJSONPolygon
+  ) => {
+    try {
+      const updated = await api.sites.update(siteId, {
+        geojson: updatedGeoJSON,
+      });
+      setSites((prev) => prev.map((s) => (s.id === siteId ? updated : s)));
+      if (selectedSite?.id === siteId) {
+        setSelectedSite(updated);
+      }
+      setEditingBoundarySite(null);
+    } catch (err) {
+      console.error('Failed to update site boundary:', err);
+      throw err;
     }
   };
 
-  const handleSelectSiteOnMap = (site: Site) => {
-    setCurrentTab('map');
+  const handleStartEditBoundaryOnMap = (site: Site) => {
+    setEditingSite(null);
+    setEditingBoundarySite(site);
+    setDrawnGeoJSON(null);
+    setIsDrawing(false);
+  };
+
+  const handleSelectSite = (site: Site | null) => {
+    if (editingBoundarySite && site?.id !== editingBoundarySite.id) {
+      setEditingBoundarySite(null);
+    }
     setSelectedSite(site);
   };
 
+  const handleSelectProjectOnMap = (projectId: number) => {
+    const firstSite = sites.find((s) => s.project_id === projectId);
+    localStorage.setItem('darukaa_current_tab', 'map');
+    if (firstSite) {
+      localStorage.setItem('darukaa_selected_site_id', String(firstSite.id));
+    }
+    window.location.reload();
+  };
+
+  const handleSelectSiteOnMap = (site: Site) => {
+    localStorage.setItem('darukaa_current_tab', 'map');
+    localStorage.setItem('darukaa_selected_site_id', String(site.id));
+    window.location.reload();
+  };
+
+  const handleJumpToCoordinates = (lat: number, lng: number) => {
+    localStorage.setItem('darukaa_current_tab', 'map');
+    localStorage.setItem('darukaa_jump_coords', JSON.stringify([lat, lng]));
+    window.location.reload();
+  };
+
+  const handleTabChange = (tab: NavTab) => {
+    if (tab === 'map' && currentTab !== 'map') {
+      localStorage.setItem('darukaa_current_tab', 'map');
+      window.location.reload();
+      return;
+    }
+    setCurrentTab(tab);
+  };
+
   const handleOpenDrawMode = () => {
-    setCurrentTab('map');
+    if (currentTab !== 'map') {
+      localStorage.setItem('darukaa_current_tab', 'map');
+      localStorage.setItem('darukaa_start_draw', 'true');
+      window.location.reload();
+      return;
+    }
     setIsDrawing(true);
+  };
+
+  const handleCancelDraw = () => {
+    setIsDrawing(false);
+    setDrawnGeoJSON(null);
+    setEditingBoundarySite(null);
   };
 
   return (
@@ -190,7 +300,7 @@ export const App: React.FC = () => {
     >
       <Sidebar
         currentTab={currentTab}
-        onTabChange={setCurrentTab}
+        onTabChange={handleTabChange}
         currentUser={currentUser}
         onLogout={handleLogout}
       />
@@ -209,14 +319,22 @@ export const App: React.FC = () => {
           onSearchChange={setSearchQuery}
           userRole={currentUser?.role}
           onOpenDrawMode={handleOpenDrawMode}
-          onOpenNewProject={() => setCurrentTab('projects')}
+          onCancelDraw={handleCancelDraw}
+          isDrawing={isDrawing}
+          hasDrawnPolygon={!!drawnGeoJSON}
+          onOpenNewProject={() => setShowCreateProjectModal(true)}
           activeTab={currentTab}
+          sites={sites}
+          projects={projects}
+          onSelectSite={handleSelectSiteOnMap}
+          onSelectProject={handleSelectProjectOnMap}
+          onJumpToCoordinates={handleJumpToCoordinates}
         />
 
         <main
           style={{
             flex: 1,
-            height: 'calc(100% - 48px)',
+            height: 'calc(100% - 52px)',
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -237,21 +355,28 @@ export const App: React.FC = () => {
               <MapView
                 sites={sites}
                 selectedSite={selectedSite}
-                onSelectSite={setSelectedSite}
+                onSelectSite={handleSelectSite}
                 onPolygonDrawn={setDrawnGeoJSON}
                 onOpenSiteForm={() => setShowSiteForm(true)}
                 isDrawing={isDrawing}
                 setIsDrawing={setIsDrawing}
                 drawnGeoJSON={drawnGeoJSON}
                 userRole={currentUser?.role}
+                searchQuery={searchQuery}
+                editingBoundarySite={editingBoundarySite}
+                onSaveEditedBoundary={handleSaveEditedBoundary}
+                onCancelEditBoundary={() => setEditingBoundarySite(null)}
               />
 
               <SiteDetailPanel
                 site={selectedSite}
                 projects={projects}
+                currentUser={currentUser}
                 onClose={() => setSelectedSite(null)}
                 onDeleteSite={handleDeleteSite}
+                onEditSite={(site) => setEditingSite(site)}
                 userRole={currentUser?.role}
+                isEditingBoundary={!!editingBoundarySite}
               />
             </div>
           ) : currentTab === 'projects' ? (
@@ -278,6 +403,21 @@ export const App: React.FC = () => {
           onSaveSite={handleSaveSite}
           onClose={() => setShowSiteForm(false)}
           onSuccessBulk={loadData}
+          onDiscard={handleCancelDraw}
+        />
+      )}
+
+      {editingSite && (
+        <SiteEditModal
+          site={editingSite}
+          projectName={
+            projects.find((p) => p.id === editingSite.project_id)?.name
+          }
+          currentUser={currentUser}
+          isOpen={!!editingSite}
+          onClose={() => setEditingSite(null)}
+          onSave={handleUpdateSite}
+          onStartEditBoundaryOnMap={handleStartEditBoundaryOnMap}
         />
       )}
 
@@ -294,6 +434,16 @@ export const App: React.FC = () => {
           project={exportProject}
           isOpen={!!exportProject}
           onClose={() => setExportProject(null)}
+        />
+      )}
+
+      {showCreateProjectModal && (
+        <CreateProjectModal
+          isOpen={showCreateProjectModal}
+          onClose={() => setShowCreateProjectModal(false)}
+          onProjectCreated={(newProj) => {
+            setProjects([newProj, ...projects]);
+          }}
         />
       )}
 

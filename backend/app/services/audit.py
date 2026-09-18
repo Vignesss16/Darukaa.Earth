@@ -1,5 +1,6 @@
 from contextvars import ContextVar
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Any, Dict, Optional
 
 from sqlalchemy import event, inspect
@@ -11,6 +12,19 @@ from app.models import AuditLog, Project, Site
 current_user_id_ctx: ContextVar[Optional[int]] = ContextVar(
     "current_user_id_ctx", default=None
 )
+
+
+def _serialize_audit_val(val: Any) -> Any:
+    """Ensure audit log diff values (like Decimal, Enum, dates) are JSON-serializable."""
+    if val is None:
+        return None
+    if isinstance(val, Decimal):
+        return float(val)
+    if hasattr(val, "value"):
+        return val.value
+    if hasattr(val, "isoformat"):
+        return val.isoformat()
+    return val
 
 
 def set_current_user_id(user_id: Optional[int]) -> None:
@@ -114,11 +128,10 @@ def register_audit_event_listeners():
                 if history.has_changes():
                     old_val = history.deleted[0] if history.deleted else None
                     new_val = history.added[0] if history.added else None
-                    if hasattr(old_val, "value"):
-                        old_val = old_val.value
-                    if hasattr(new_val, "value"):
-                        new_val = new_val.value
-                    diff[attr.key] = {"old": old_val, "new": new_val}
+                    diff[attr.key] = {
+                        "old": _serialize_audit_val(old_val),
+                        "new": _serialize_audit_val(new_val),
+                    }
 
             if diff:
                 entity_type = (

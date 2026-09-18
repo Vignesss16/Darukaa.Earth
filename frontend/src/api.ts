@@ -2,6 +2,7 @@ import {
   ActivityLogItem,
   AssistantChatResponse,
   BulkImportResponse,
+  ChatHistoryItem,
   DegradationAlert,
   GeoJSONPolygon,
   Project,
@@ -9,6 +10,7 @@ import {
   Site,
   SiteCompareResult,
   SiteMetric,
+  MetricType,
   TokenResponse,
   User,
 } from './types';
@@ -192,10 +194,14 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ site_ids: siteIds }),
       }),
-    chatAssistant: (siteId: number, message: string) =>
+    chatAssistant: (
+      siteId: number,
+      message: string,
+      history?: ChatHistoryItem[]
+    ) =>
       request<AssistantChatResponse>(`/sites/${siteId}/assistant/chat`, {
         method: 'POST',
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, history }),
       }),
   },
   metrics: {
@@ -210,6 +216,19 @@ export const api = {
           method: 'POST',
         }
       ),
+    bulkCreate: (
+      siteId: number,
+      metricsData: Array<{
+        metric_type: MetricType;
+        value: number;
+        recorded_at: string;
+        source?: string;
+      }>
+    ) =>
+      request<SiteMetric[]>(`/sites/${siteId}/metrics/bulk`, {
+        method: 'POST',
+        body: JSON.stringify(metricsData),
+      }),
   },
   alerts: {
     list: (siteId?: number) =>

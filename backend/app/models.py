@@ -41,6 +41,8 @@ class MetricType(str, enum.Enum):
     CARBON_TONS = "carbon_tons"
     BIODIVERSITY_INDEX = "biodiversity_index"
     CANOPY_COVER = "canopy_cover"
+    DEFORESTATION_AREA_KM2 = "deforestation_area_km2"
+    FIRE_INCIDENTS = "fire_incidents"
 
 
 class User(Base):
@@ -84,8 +86,10 @@ class Site(Base):
     area_hectares = Column(Numeric(12, 4), nullable=True)
     site_type = Column(Enum(SiteType), nullable=False, default=SiteType.MIXED)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     project = relationship("Project", back_populates="sites")
+    creator = relationship("User", foreign_keys=[created_by_id])
     metrics = relationship(
         "SiteMetric", back_populates="site", cascade="all, delete-orphan"
     )

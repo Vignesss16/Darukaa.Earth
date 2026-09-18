@@ -34,6 +34,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
+    import app.models  # noqa: F401
     from app.database import Base
 
     # Create all tables for SQLite test session

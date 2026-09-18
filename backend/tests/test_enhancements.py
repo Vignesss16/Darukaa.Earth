@@ -231,3 +231,117 @@ def test_scoped_ai_assistant(client: TestClient, admin_token_headers: dict):
     assert "response" in data
     assert data["site_id"] == site["id"]
     assert data["is_ai_generated"] is True
+
+
+def test_scoped_ai_assistant_long_history(
+    client: TestClient, admin_token_headers: dict
+):
+    proj_res = client.post(
+        "/api/v1/projects",
+        json={"name": "AI Long History Project"},
+        headers=admin_token_headers,
+    )
+    proj_id = proj_res.json()["id"]
+
+    polygon = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [75.80, 11.25],
+                [75.82, 11.25],
+                [75.82, 11.27],
+                [75.80, 11.27],
+                [75.80, 11.25],
+            ]
+        ],
+    }
+    site = client.post(
+        "/api/v1/sites",
+        json={
+            "project_id": proj_id,
+            "name": "AI Long History Site",
+            "site_type": "carbon",
+            "geojson": polygon,
+        },
+        headers=admin_token_headers,
+    ).json()
+
+    long_analysis = "Telemetry breakdown and audit: " + (
+        "NDVI 0.78 stable canopy; " * 300
+    )
+    assert len(long_analysis) > 5000
+
+    res = client.post(
+        f"/api/v1/sites/{site['id']}/assistant/chat",
+        json={
+            "message": "pdf report?",
+            "history": [
+                {"role": "user", "content": "analysis"},
+                {"role": "assistant", "content": long_analysis},
+            ],
+        },
+        headers=admin_token_headers,
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert "response" in data
+
+
+def test_bulk_metrics_import(client: TestClient, admin_token_headers: dict):
+    proj_res = client.post(
+        "/api/v1/projects",
+        json={"name": "Bulk Metrics Project", "description": "Testing bulk metrics"},
+        headers=admin_token_headers,
+    )
+    proj_id = proj_res.json()["id"]
+
+    polygon = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [-70.5, -9.0],
+                [-70.0, -9.0],
+                [-70.0, -8.5],
+                [-70.5, -8.5],
+                [-70.5, -9.0],
+            ]
+        ],
+    }
+    site = client.post(
+        "/api/v1/sites",
+        json={
+            "project_id": proj_id,
+            "name": "Amazonas Sector",
+            "site_type": "mixed",
+            "geojson": polygon,
+        },
+        headers=admin_token_headers,
+    ).json()
+
+    bulk_data = [
+        {
+            "metric_type": "deforestation_area_km2",
+            "value": 1250.5,
+            "recorded_at": "2019-01-01T00:00:00Z",
+            "source": "INPE PRODES",
+        },
+        {
+            "metric_type": "fire_incidents",
+            "value": 3420,
+            "recorded_at": "2019-01-01T00:00:00Z",
+            "source": "INPE BDQueimadas",
+        },
+    ]
+
+    res = client.post(
+        f"/api/v1/sites/{site['id']}/metrics/bulk",
+        json=bulk_data,
+        headers=admin_token_headers,
+    )
+    assert res.status_code == 201
+    result = res.json()
+    assert len(result) == 2
+    assert result[0]["metric_type"] == "deforestation_area_km2"
+    assert result[0]["value"] == 1250.5
+    assert result[1]["metric_type"] == "fire_incidents"
+    assert result[1]["value"] == 3420

@@ -81,6 +81,46 @@ def create_site_metric(
 
 
 @router.post(
+    "/api/v1/sites/{site_id}/metrics/bulk",
+    response_model=List[SiteMetricOut],
+    status_code=status.HTTP_201_CREATED,
+    summary="Bulk ingest site metric readings",
+    description="Bulk record time-series metric readings for a site from CSV import. Requires Admin or Analyst role permissions.",
+)
+def bulk_create_site_metrics(
+    site_id: int,
+    metrics_in: List[SiteMetricCreate],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.ANALYST])),
+):
+    """Bulk record metric entries for a site."""
+    site = db.query(Site).filter(Site.id == site_id).first()
+    if not site:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Site with ID {site_id} was not found.",
+        )
+
+    created_metrics: List[SiteMetric] = []
+    for item in metrics_in:
+        m = SiteMetric(
+            site_id=site_id,
+            metric_type=item.metric_type,
+            value=item.value,
+            recorded_at=item.recorded_at,
+            source=item.source,
+        )
+        db.add(m)
+        created_metrics.append(m)
+
+    db.commit()
+    for m in created_metrics:
+        db.refresh(m)
+
+    return created_metrics
+
+
+@router.post(
     "/api/v1/sites/{site_id}/seed-metrics",
     response_model=List[SiteMetricOut],
     status_code=status.HTTP_201_CREATED,

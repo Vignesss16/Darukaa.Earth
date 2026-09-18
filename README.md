@@ -169,6 +169,56 @@ npm run dev
 
 ---
 
+## 📊 Telemetry Metrics, CSV Ingestion & INPE Brazilian Amazon Dataset
+
+### 1. Extended Telemetry Metrics Schema
+The PostgreSQL native `metrictype` enum and SQLAlchemy models support 6 telemetry metric types:
+- `ndvi`: Normalized Difference Vegetation Index (0.0 to 1.0)
+- `canopy_cover`: Percentage tree canopy cover (0% to 100%)
+- `carbon_tons`: Estimated carbon biomass stock (metric tonnes CO₂e)
+- `biodiversity_index`: Ecological species diversity index (0.0 to 1.0)
+- `deforestation_area_km2`: Annual tree loss area in square kilometers
+- `fire_incidents`: Thermal anomaly and wildfire count
+
+All metric migrations are handled safely via Alembic migration `002_add_metric_types.py` with zero data loss to existing sites and records.
+
+### 2. Generic CSV Import Feature (UI)
+Admins and Analysts can import arbitrary historical or sensor time-series data for any site:
+1. Open any conservation site and navigate to the **Analytics** tab.
+2. Click **Import CSV** next to the telemetry action buttons.
+3. Upload any `.csv` file. The parser dynamically reads headers and displays a flexible column mapping interface:
+   - **Metric Type**: Map from a CSV column (e.g. `metric_type`) or select a fixed type for all rows (e.g., `deforestation_area_km2` or `fire_incidents`).
+   - **Recorded Date**: Maps ISO dates, `YYYY-MM-DD`, `YYYY/MM/DD`, or bare `YYYY` years.
+   - **Metric Value**: Numeric parser supporting both comma and dot decimal separators.
+   - **Source**: Optional telemetry source tag.
+4. **Validation & Preview**: The modal validates every row, highlights invalid rows with line numbers, displays a 5-row preview table, and bulk-inserts validated rows via `POST /api/v1/sites/{site_id}/metrics/bulk`.
+
+### 3. Kaggle INPE Brazilian Amazon Dataset Integration
+The platform includes an automated ingestion pipeline for the official Brazilian National Institute for Space Research (INPE) Amazon deforestation and fire incident dataset:
+- **Project**: Automatically creates/attaches to `Brazilian Legal Amazon (INPE dataset)`.
+- **9 State Sites**: Acre (AC), Amazonas (AM), Amapá (AP), Maranhão (MA), Mato Grosso (MT), Pará (PA), Rondônia (RO), Roraima (RR), and Tocantins (TO). Each site features a ~1-degree bounding box centered on the state's geographic coordinates.
+- **Data Files**:
+  - `def_area_2004_2019.csv` (PRODES annual deforestation area in km²)
+  - `inpe_brazilian_amazon_fires_1999_2019.csv` (BDQueimadas annual wildfire incident counts)
+
+#### Running the Ingestion Script:
+1. Place the CSV files into `backend/data/kaggle/`:
+   ```bash
+   backend/data/kaggle/def_area_2004_2019.csv
+   backend/data/kaggle/inpe_brazilian_amazon_fires_1999_2019.csv
+   ```
+2. Run the automated ingestion script:
+   ```bash
+   # Via Docker:
+   docker exec -it darukaa_backend python scripts/import_kaggle_data.py
+
+   # Or locally:
+   cd backend && python scripts/import_kaggle_data.py
+   ```
+3. The script will automatically create the project and 9 state polygons, parse both datasets, and bulk-insert the time-series metrics.
+
+---
+
 ## 🔑 Pre-seeded Demo Credentials
 
 The backend automatically seeds demo accounts on initial startup:

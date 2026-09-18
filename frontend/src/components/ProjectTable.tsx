@@ -1,19 +1,10 @@
 import React, { useState } from 'react';
 import { Project, UserRole } from '../types';
-import {
-  Plus,
-  Search,
-  Layers,
-  Eye,
-  Trash2,
-  Globe,
-  FileText,
-  BarChart2,
-} from 'lucide-react';
+import { Layers, Eye, Trash2, FileText, BarChart2 } from 'lucide-react';
 
 interface ProjectTableProps {
   projects: Project[];
-  onCreateProject: (name: string, description?: string) => Promise<void>;
+  onCreateProject?: (name: string, description?: string) => Promise<void>;
   onDeleteProject: (id: number) => Promise<void>;
   onSelectProjectOnMap: (projectId: number) => void;
   onOpenCompare?: () => void;
@@ -24,59 +15,26 @@ interface ProjectTableProps {
 
 export const ProjectTable: React.FC<ProjectTableProps> = ({
   projects,
-  onCreateProject,
   onDeleteProject,
   onSelectProjectOnMap,
   onOpenCompare,
   onOpenExportSummary,
   userRole,
-  searchQuery: externalSearchQuery = '',
+  searchQuery = '',
 }) => {
-  const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'active' | 'archived'
   >('all');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDesc, setNewProjectDesc] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  const activeSearch = externalSearchQuery || internalSearchQuery;
 
   const filteredProjects = projects.filter((p) => {
     const matchesSearch =
-      p.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
+      !searchQuery.trim() ||
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.description &&
-        p.description.toLowerCase().includes(activeSearch.toLowerCase()));
+        p.description.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProjectName.trim()) {
-      setErrorMsg('Project name is required');
-      return;
-    }
-    try {
-      setIsSubmitting(true);
-      setErrorMsg('');
-      await onCreateProject(
-        newProjectName.trim(),
-        newProjectDesc.trim() || undefined
-      );
-      setNewProjectName('');
-      setNewProjectDesc('');
-      setShowCreateModal(false);
-    } catch (err: unknown) {
-      setErrorMsg(
-        err instanceof Error ? err.message : 'Failed to create project'
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div
@@ -118,7 +76,7 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {onOpenCompare && (
             <button
               onClick={onOpenCompare}
@@ -129,71 +87,70 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
               Compare Sites
             </button>
           )}
-
-          {(userRole === 'admin' || userRole === 'analyst') && (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="btn-canopy"
-              style={{ height: '32px', fontSize: '12px' }}
-            >
-              <Plus size={14} />
-              New Project
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
+      {/* Filter & Summary Bar */}
       <div
         className="card-container"
         style={{
           display: 'flex',
-          gap: '12px',
+          justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '16px',
-          padding: '10px 14px',
+          padding: '10px 16px',
           backgroundColor: '#FFFFFF',
         }}
       >
         <div
           style={{
-            position: 'relative',
-            flex: 1,
             display: 'flex',
             alignItems: 'center',
+            gap: '8px',
+            fontSize: '13px',
+            color: 'var(--color-ink)',
           }}
         >
-          <Search
-            size={14}
-            color="var(--color-ink-muted)"
-            style={{
-              position: 'absolute',
-              left: '10px',
-              pointerEvents: 'none',
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Filter projects by name or description..."
-            value={internalSearchQuery}
-            onChange={(e) => setInternalSearchQuery(e.target.value)}
-            className="input-field"
-            style={{ paddingLeft: '30px', height: '30px', fontSize: '12px' }}
-          />
+          <span style={{ fontWeight: 600 }}>{filteredProjects.length}</span>
+          <span style={{ color: 'var(--color-ink-muted)' }}>
+            of {projects.length}{' '}
+            {projects.length === 1 ? 'project' : 'projects'}
+          </span>
+          {searchQuery && (
+            <span
+              style={{
+                marginLeft: '8px',
+                fontSize: '11px',
+                backgroundColor: '#F1F5F9',
+                color: '#059669',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontWeight: 600,
+                border: '1px solid #E2E8F0',
+              }}
+            >
+              Filtered by: "{searchQuery}"
+            </span>
+          )}
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setStatusFilter(e.target.value as 'all' | 'active' | 'archived')
-          }
-          className="input-field"
-          style={{ width: '150px', height: '30px', fontSize: '12px' }}
-        >
-          <option value="all">All statuses</option>
-          <option value="active">Active projects</option>
-          <option value="archived">Archived projects</option>
-        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--color-ink-muted)' }}>
+            Status:
+          </span>
+          <select
+            value={statusFilter}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setStatusFilter(e.target.value as 'all' | 'active' | 'archived')
+            }
+            className="input-field"
+            style={{ width: '140px', height: '30px', fontSize: '12px' }}
+          >
+            <option value="all">All statuses</option>
+            <option value="active">Active projects</option>
+            <option value="archived">Archived projects</option>
+          </select>
+        </div>
       </div>
 
       {/* Scannable Project Index Table */}
@@ -376,140 +333,6 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
           </tbody>
         </table>
       </div>
-
-      {/* Create Project Modal */}
-      {showCreateModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(15, 23, 42, 0.4)',
-            backdropFilter: 'blur(2px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-          }}
-        >
-          <div
-            className="card-container"
-            style={{
-              width: '440px',
-              padding: '20px 24px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '16px',
-              }}
-            >
-              <Globe size={18} color="var(--color-teal)" />
-              <h2
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 700,
-                  color: 'var(--color-ink)',
-                }}
-              >
-                Create Conservation Project
-              </h2>
-            </div>
-
-            {errorMsg && (
-              <div
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: '#FEF2F2',
-                  border: '1px solid rgba(181, 86, 60, 0.4)',
-                  color: 'var(--color-clay)',
-                  fontSize: '12px',
-                  borderRadius: '4px',
-                  marginBottom: '16px',
-                }}
-              >
-                {errorMsg}
-              </div>
-            )}
-
-            <form onSubmit={handleCreateSubmit}>
-              <div style={{ marginBottom: '14px' }}>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    marginBottom: '4px',
-                  }}
-                >
-                  Project Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Western Ghats Biodiversity Reserve"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  className="input-field"
-                  style={{ height: '32px' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    marginBottom: '4px',
-                  }}
-                >
-                  Description & Regional Objectives
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Summary of carbon offset targets, ecosystem type, and regional focus..."
-                  value={newProjectDesc}
-                  onChange={(e) => setNewProjectDesc(e.target.value)}
-                  className="input-field"
-                  style={{ height: 'auto', padding: '8px 10px' }}
-                />
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '8px',
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="btn-secondary"
-                  style={{ height: '30px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn-canopy"
-                  style={{ height: '30px' }}
-                >
-                  {isSubmitting ? 'Creating Project...' : 'Save Project'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -152,6 +152,7 @@ class SiteOut(BaseModel):
     site_type: SiteType
     geojson: Dict[str, Any]
     created_at: Optional[datetime] = None
+    created_by_id: Optional[int] = None
 
 
 # ==========================================
@@ -205,10 +206,12 @@ class SiteCompareOut(BaseModel):
 # ==========================================
 class ProjectSummarySiteItem(BaseModel):
     site_id: int
+    id: Optional[int] = None
     name: str
     site_type: str
     area_hectares: Optional[float] = 0.0
     active_alert_count: int = 0
+    alert_count: Optional[int] = 0
     latest_canopy_cover: Optional[float] = None
     latest_ndvi: Optional[float] = None
     health_status: str = "Healthy"
@@ -221,15 +224,23 @@ class ProjectSummaryOut(BaseModel):
     total_sites: int
     total_area_hectares: float
     sites_by_classification: Dict[str, int]
+    site_type_counts: Optional[Dict[str, int]] = None
     total_active_alerts: int
     site_summaries: list[ProjectSummarySiteItem]
+    sites: Optional[list[ProjectSummarySiteItem]] = None
 
 
 # ==========================================
 # AI Assistant Schemas
 # ==========================================
+class ChatHistoryItem(BaseModel):
+    role: str = Field(..., description="Role: user or assistant")
+    content: str = Field(..., min_length=1, max_length=50000)
+
+
 class AssistantChatRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=1000)
+    message: str = Field(..., min_length=1, max_length=10000)
+    history: Optional[list[ChatHistoryItem]] = None
 
 
 class AssistantChatResponse(BaseModel):

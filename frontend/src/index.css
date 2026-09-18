@@ -271,21 +271,154 @@ textarea {
   background: var(--color-line-dark);
 }
 
+/* ------------------------------------------------------------- */
+/* Spring Physics & Micro-Interactions for Chatbot & Telemetry   */
+/* ------------------------------------------------------------- */
+@keyframes chatSpringUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chatDotBounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseAura {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.25;
+  }
+}
+
+.chat-spring-in {
+  animation: chatSpringUp 0.36s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.chat-dot-1 {
+  animation: chatDotBounce 1.2s infinite ease-in-out both;
+}
+.chat-dot-2 {
+  animation: chatDotBounce 1.2s infinite ease-in-out both;
+  animation-delay: 0.16s;
+}
+.chat-dot-3 {
+  animation: chatDotBounce 1.2s infinite ease-in-out both;
+  animation-delay: 0.32s;
+}
+
+.chat-btn-spring {
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.chat-btn-spring:hover:not(:disabled) {
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+}
+.chat-btn-spring:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.chat-chip-spring {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.chat-chip-spring:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+  border-color: #059669 !important;
+  color: #047857 !important;
+  background-color: #ecfdf5 !important;
+}
+.chat-chip-spring:active {
+  transform: scale(0.96);
+}
+
+.pulse-aura {
+  animation: pulseAura 2s infinite ease-in-out;
+}
+
+/* Enlarged Chatbot Centered Modal */
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalZoomPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.chat-modal-backdrop {
+  animation: modalBackdropFadeIn 0.2s ease-out forwards;
+}
+
+.chat-modal-window {
+  animation: modalZoomPop 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Executive Single-Page Print Report Styles */
+.executive-pdf-report,
+.printable-project-dossier {
+  display: none !important;
+}
+
 @media print {
   @page {
     size: A4 portrait;
-    margin: 15mm;
+    margin: 0 !important;
   }
 
-  body,
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
   html,
-  #root {
+  body,
+  #root,
+  #root > div,
+  main {
     background: #ffffff !important;
-    color: #000000 !important;
+    color: #0f172a !important;
     overflow: visible !important;
     height: auto !important;
+    max-height: none !important;
     width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Hide app navigation shell, sidebar, header, map canvas, and buttons during print */
@@ -295,6 +428,7 @@ textarea {
   .print\:hidden,
   .mapboxgl-map,
   .mapboxgl-control-container,
+  .chat-modal-backdrop,
   button {
     display: none !important;
   }
@@ -303,6 +437,7 @@ textarea {
   .printable-site-panel {
     position: static !important;
     top: 0 !important;
+    left: 0 !important;
     right: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -311,6 +446,41 @@ textarea {
     border: none !important;
     transform: none !important;
     background: #ffffff !important;
+    display: block !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .printable-pdf-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  /* When printing Project Portfolio Summary Dossier */
+  body.printing-project-dossier main,
+  body.printing-project-dossier aside,
+  body.printing-project-dossier header,
+  body.printing-project-dossier nav,
+  body.printing-project-dossier .print\:hidden {
+    display: none !important;
+  }
+
+  body.printing-project-dossier .printable-project-dossier {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    margin: 0 auto !important;
+    padding: 20px 24px !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    page-break-inside: avoid !important;
   }
 }
-
