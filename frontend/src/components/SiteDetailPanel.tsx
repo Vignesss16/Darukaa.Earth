@@ -822,27 +822,13 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                 fontSize: isEnlarged ? '14px' : '12px',
                 fontWeight: 700,
                 color: '#0F172A',
-                lineHeight: 1.2,
+                lineHeight: 1.25,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                flexWrap: 'wrap',
+                gap: '6px',
               }}
             >
               <span>Darukaa Planetary AI</span>
-              <span
-                style={{
-                  fontSize: isEnlarged ? '10px' : '9.5px',
-                  fontWeight: 600,
-                  color: '#047857',
-                  backgroundColor: '#ECFDF5',
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  border: '1px solid #A7F3D0',
-                }}
-              >
-                Groq Scoped
-              </span>
               {isEnlarged && site && (
                 <span
                   style={{
@@ -853,6 +839,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                     padding: '1px 8px',
                     borderRadius: '4px',
                     border: '1px solid #CBD5E1',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {site.name} • {site.site_type}
@@ -866,11 +853,10 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
               style={{
                 fontSize: isEnlarged ? '11px' : '10.5px',
                 color: '#64748B',
-                maxWidth: isEnlarged ? '620px' : '150px',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                marginTop: '1px',
+                marginTop: '2px',
               }}
             >
               {isEnlarged && site
