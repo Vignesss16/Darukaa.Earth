@@ -295,6 +295,25 @@ export const App: React.FC = () => {
     setEditingBoundarySite(null);
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    const trimmed = query.trim().toLowerCase();
+    if (trimmed && projects.length > 0 && sites.length > 0) {
+      const matchedProj = projects.find(
+        (p) => p.name.trim().toLowerCase() === trimmed
+      );
+      if (matchedProj) {
+        const projSites = sites.filter((s) => s.project_id === matchedProj.id);
+        if (
+          projSites.length > 0 &&
+          (!selectedSite || selectedSite.project_id !== matchedProj.id)
+        ) {
+          setSelectedSite(projSites[0]);
+        }
+      }
+    }
+  };
+
   return (
     <div
       style={{
@@ -323,7 +342,7 @@ export const App: React.FC = () => {
       >
         <Header
           searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          onSearchChange={handleSearchChange}
           userRole={currentUser?.role}
           onOpenDrawMode={handleOpenDrawMode}
           onCancelDraw={handleCancelDraw}
@@ -372,7 +391,7 @@ export const App: React.FC = () => {
                 drawnGeoJSON={drawnGeoJSON}
                 userRole={currentUser?.role}
                 searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
+                onSearchChange={handleSearchChange}
                 editingBoundarySite={editingBoundarySite}
                 onSaveEditedBoundary={handleSaveEditedBoundary}
                 onCancelEditBoundary={() => setEditingBoundarySite(null)}

@@ -1133,6 +1133,12 @@ export const MapView: React.FC<MapViewProps> = ({
                       );
                       if (proj) {
                         onSearchChange?.(proj.name);
+                        const projSites = sites.filter(
+                          (s) => s.project_id === proj.id
+                        );
+                        if (projSites.length > 0) {
+                          onSelectSite(projSites[0]);
+                        }
                       }
                     }
                   }}
