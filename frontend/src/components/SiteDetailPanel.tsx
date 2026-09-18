@@ -42,11 +42,14 @@ import {
   Maximize2,
   Minimize2,
   Upload,
+  Folder,
 } from 'lucide-react';
 
 interface SiteDetailPanelProps {
   site: Site | null;
   projects: Project[];
+  sites?: Site[];
+  onSelectSite?: (site: Site) => void;
   currentUser?: User | null;
   onClose: () => void;
   onDeleteSite: (id: number) => void;
@@ -58,6 +61,8 @@ interface SiteDetailPanelProps {
 export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
   site,
   projects,
+  sites = [],
+  onSelectSite,
   currentUser,
   onClose,
   onDeleteSite,
@@ -2500,6 +2505,144 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                 </span>
               </div>
             )}
+
+            {/* Polygon Switcher / Cycler when multiple sites exist in this project */}
+            {(() => {
+              const projectSites = sites.filter(
+                (s) => s.project_id === site.project_id
+              );
+              const currentSiteIndex = projectSites.findIndex(
+                (s) => s.id === site.id
+              );
+
+              if (projectSites.length <= 1) return null;
+
+              return (
+                <div
+                  style={{
+                    marginTop: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: '#ECFDF5',
+                    border: '1px solid #A7F3D0',
+                    borderRadius: '8px',
+                    padding: '5px 10px',
+                    gap: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: '#065F46',
+                    }}
+                  >
+                    <Folder size={12} color="#059669" />
+                    <span>
+                      Polygon {currentSiteIndex >= 0 ? currentSiteIndex + 1 : 1}{' '}
+                      of {projectSites.length}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <select
+                      value={site.id}
+                      onChange={(e) => {
+                        const targetId = Number(e.target.value);
+                        const targetSite = projectSites.find(
+                          (s) => s.id === targetId
+                        );
+                        if (targetSite && onSelectSite) {
+                          onSelectSite(targetSite);
+                        }
+                      }}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        border: '1px solid #6EE7B7',
+                        backgroundColor: '#FFFFFF',
+                        color: '#065F46',
+                        cursor: 'pointer',
+                        maxWidth: '130px',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title="Jump to another polygon in this project"
+                    >
+                      {projectSites.map((ps) => (
+                        <option key={ps.id} value={ps.id}>
+                          {ps.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const prevIdx =
+                          (currentSiteIndex - 1 + projectSites.length) %
+                          projectSites.length;
+                        if (projectSites[prevIdx] && onSelectSite) {
+                          onSelectSite(projectSites[prevIdx]);
+                        }
+                      }}
+                      style={{
+                        padding: '2px 5px',
+                        borderRadius: '4px',
+                        border: '1px solid #6EE7B7',
+                        backgroundColor: '#FFFFFF',
+                        color: '#047857',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      title="Previous polygon in project"
+                    >
+                      <ChevronLeft size={13} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextIdx =
+                          (currentSiteIndex + 1) % projectSites.length;
+                        if (projectSites[nextIdx] && onSelectSite) {
+                          onSelectSite(projectSites[nextIdx]);
+                        }
+                      }}
+                      style={{
+                        padding: '2px 5px',
+                        borderRadius: '4px',
+                        border: '1px solid #6EE7B7',
+                        backgroundColor: '#FFFFFF',
+                        color: '#047857',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      title="Next polygon in project"
+                    >
+                      <ChevronRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Action Buttons Row */}

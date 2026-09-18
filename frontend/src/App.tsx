@@ -381,6 +381,8 @@ export const App: React.FC = () => {
               <SiteDetailPanel
                 site={selectedSite}
                 projects={projects}
+                sites={sites}
+                onSelectSite={handleSelectSite}
                 currentUser={currentUser}
                 onClose={() => setSelectedSite(null)}
                 onDeleteSite={handleDeleteSite}

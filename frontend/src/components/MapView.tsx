@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   RefreshCw,
   Folder,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
@@ -1159,6 +1161,131 @@ export const MapView: React.FC<MapViewProps> = ({
                     );
                   })}
                 </select>
+
+                {(() => {
+                  const activeProject = projects.find(
+                    (p) =>
+                      p.name.toLowerCase().trim() ===
+                      (searchQuery || '').toLowerCase().trim()
+                  );
+                  const projectSites = activeProject
+                    ? sites.filter((s) => s.project_id === activeProject.id)
+                    : selectedSite?.project_id
+                      ? sites.filter(
+                          (s) => s.project_id === selectedSite.project_id
+                        )
+                      : [];
+
+                  if (projectSites.length <= 1) return null;
+
+                  return (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        marginLeft: '4px',
+                      }}
+                    >
+                      <select
+                        value={selectedSite?.id || ''}
+                        onChange={(e) => {
+                          const targetId = Number(e.target.value);
+                          const targetSite = projectSites.find(
+                            (s) => s.id === targetId
+                          );
+                          if (targetSite) onSelectSite(targetSite);
+                        }}
+                        style={{
+                          height: '22px',
+                          fontSize: '11px',
+                          padding: '0 6px',
+                          borderRadius: '4px',
+                          border: '1px solid #6EE7B7',
+                          backgroundColor: '#ECFDF5',
+                          color: '#065F46',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          maxWidth: '170px',
+                        }}
+                        title="Jump directly to a polygon in this project"
+                      >
+                        <option value="" disabled>
+                          Jump to Polygon ({projectSites.length})...
+                        </option>
+                        {projectSites.map((ps) => (
+                          <option key={ps.id} value={ps.id}>
+                            {ps.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      {selectedSite && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currIdx = projectSites.findIndex(
+                                (s) => s.id === selectedSite.id
+                              );
+                              const prevIdx =
+                                (currIdx - 1 + projectSites.length) %
+                                projectSites.length;
+                              if (projectSites[prevIdx]) {
+                                onSelectSite(projectSites[prevIdx]);
+                              }
+                            }}
+                            style={{
+                              height: '22px',
+                              width: '22px',
+                              padding: 0,
+                              borderRadius: '4px',
+                              border: '1px solid #6EE7B7',
+                              backgroundColor: '#ECFDF5',
+                              color: '#065F46',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            title="Previous Polygon"
+                          >
+                            <ChevronLeft size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currIdx = projectSites.findIndex(
+                                (s) => s.id === selectedSite.id
+                              );
+                              const nextIdx =
+                                (currIdx + 1) % projectSites.length;
+                              if (projectSites[nextIdx]) {
+                                onSelectSite(projectSites[nextIdx]);
+                              }
+                            }}
+                            style={{
+                              height: '22px',
+                              width: '22px',
+                              padding: 0,
+                              borderRadius: '4px',
+                              border: '1px solid #6EE7B7',
+                              backgroundColor: '#ECFDF5',
+                              color: '#065F46',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            title="Next Polygon"
+                          >
+                            <ChevronRight size={12} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </>
           )}
