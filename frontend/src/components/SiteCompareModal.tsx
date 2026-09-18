@@ -14,6 +14,9 @@ import {
   Activity,
   Sparkles,
   Info,
+  Plus,
+  Search,
+  ChevronDown,
 } from 'lucide-react';
 
 interface SiteCompareModalProps {
@@ -33,6 +36,8 @@ export const SiteCompareModal: React.FC<SiteCompareModalProps> = ({
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     if (sites.length >= 2) {
@@ -200,25 +205,27 @@ export const SiteCompareModal: React.FC<SiteCompareModalProps> = ({
           </button>
         </div>
 
-        {/* Site Selector Pills Toolbar */}
+        {/* Site Selector Pills Toolbar (Optimized Compact View) */}
         <div
           style={{
             backgroundColor: '#f8fafc',
-            padding: '14px 28px',
+            padding: '12px 28px',
             borderBottom: '1px solid #e2e8f0',
             display: 'flex',
-            flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '12px',
+            gap: '16px',
+            position: 'relative',
+            zIndex: 10,
           }}
         >
           <div
             style={{
               display: 'flex',
-              flexWrap: 'wrap',
               alignItems: 'center',
               gap: '10px',
+              flexWrap: 'wrap',
+              flex: 1,
             }}
           >
             <span
@@ -228,59 +235,260 @@ export const SiteCompareModal: React.FC<SiteCompareModalProps> = ({
                 color: '#64748b',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
-                marginRight: '4px',
+                whiteSpace: 'nowrap',
               }}
             >
-              Select Sites (2–3):
+              Comparing Sites (2–3):
             </span>
-            {sites.map((s) => {
-              const isSelected = selectedSiteIds.includes(s.id);
+
+            {/* Selected Active Site Badges */}
+            {selectedSiteIds.map((id) => {
+              const siteObj = sites.find((s) => s.id === id);
+              if (!siteObj) return null;
               return (
-                <button
-                  key={s.id}
-                  onClick={() => toggleSite(s.id)}
+                <div
+                  key={id}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '7px',
-                    padding: '6px 12px',
+                    gap: '6px',
+                    padding: '5px 10px 5px 12px',
                     borderRadius: '8px',
+                    backgroundColor: '#ecfdf5',
+                    border: '1.5px solid #10b981',
+                    color: '#065f46',
                     fontSize: '12px',
-                    fontWeight: isSelected ? 600 : 500,
-                    transition: 'all 0.15s ease',
-                    cursor: 'pointer',
-                    backgroundColor: isSelected ? '#ecfdf5' : '#ffffff',
-                    color: isSelected ? '#065f46' : '#475569',
-                    border: isSelected
-                      ? '1.5px solid #10b981'
-                      : '1px solid #cbd5e1',
-                    boxShadow: isSelected
-                      ? '0 2px 4px rgba(16, 185, 129, 0.12)'
-                      : 'none',
+                    fontWeight: 600,
+                    boxShadow: '0 1px 2px rgba(16, 185, 129, 0.1)',
                   }}
-                  className="hover:border-emerald-400"
                 >
-                  {isSelected ? (
-                    <CheckCircle2 size={14} className="text-emerald-600" />
-                  ) : (
-                    <Circle size={14} className="text-slate-400" />
+                  <CheckCircle2 size={13} className="text-emerald-600" />
+                  <span>{siteObj.name}</span>
+                  {selectedSiteIds.length > 2 && (
+                    <button
+                      onClick={() => toggleSite(id)}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        color: '#059669',
+                        padding: '1px',
+                        marginLeft: '4px',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      className="hover:bg-emerald-200 hover:text-emerald-900"
+                      title="Remove from comparison"
+                    >
+                      <X size={13} />
+                    </button>
                   )}
-                  <span>{s.name}</span>
-                </button>
+                </div>
               );
             })}
+
+            {/* Dropdown Selector for Adding / Changing Sites */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  color: '#0f172a',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                }}
+                className="hover:border-emerald-500 hover:text-emerald-700"
+              >
+                <Plus size={14} className="text-emerald-600" />
+                <span>
+                  {selectedSiteIds.length < 3
+                    ? 'Add Site to Compare'
+                    : 'Change Sites'}
+                </span>
+                <ChevronDown size={14} className="text-slate-400" />
+              </button>
+
+              {/* Popover Menu */}
+              {dropdownOpen && (
+                <>
+                  {/* Backdrop overlay */}
+                  <div
+                    onClick={() => setDropdownOpen(false)}
+                    style={{
+                      position: 'fixed',
+                      inset: 0,
+                      zIndex: 40,
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 6px)',
+                      left: 0,
+                      width: '320px',
+                      backgroundColor: '#ffffff',
+                      borderRadius: '12px',
+                      boxShadow:
+                        '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid #e2e8f0',
+                      zIndex: 50,
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                    }}
+                  >
+                    {/* Search Input */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        padding: '6px 10px',
+                      }}
+                    >
+                      <Search size={14} className="text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Search sites by name..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{
+                          border: 'none',
+                          outline: 'none',
+                          backgroundColor: 'transparent',
+                          fontSize: '12px',
+                          color: '#0f172a',
+                          width: '100%',
+                        }}
+                        autoFocus
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          style={{
+                            border: 'none',
+                            background: 'none',
+                            cursor: 'pointer',
+                            color: '#94a3b8',
+                            padding: 0,
+                          }}
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Scrollable Site List */}
+                    <div
+                      style={{
+                        maxHeight: '220px',
+                        overflowY: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
+                      }}
+                    >
+                      {sites
+                        .filter((s) =>
+                          s.name
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+                        )
+                        .map((s) => {
+                          const isSelected = selectedSiteIds.includes(s.id);
+                          return (
+                            <button
+                              key={s.id}
+                              onClick={() => toggleSite(s.id)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                textAlign: 'left',
+                                backgroundColor: isSelected
+                                  ? '#ecfdf5'
+                                  : 'transparent',
+                                color: isSelected ? '#065f46' : '#334155',
+                                fontWeight: isSelected ? 600 : 400,
+                                border: 'none',
+                                cursor: 'pointer',
+                              }}
+                              className="hover:bg-slate-100"
+                            >
+                              <span
+                                style={{
+                                  textOverflow: 'ellipsis',
+                                  overflow: 'hidden',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {s.name}
+                              </span>
+                              {isSelected ? (
+                                <CheckCircle2
+                                  size={14}
+                                  className="text-emerald-600 flex-shrink-0"
+                                />
+                              ) : (
+                                <Circle
+                                  size={14}
+                                  className="text-slate-300 flex-shrink-0"
+                                />
+                              )}
+                            </button>
+                          );
+                        })}
+                      {sites.filter((s) =>
+                        s.name.toLowerCase().includes(searchQuery.toLowerCase())
+                      ).length === 0 && (
+                        <div
+                          style={{
+                            padding: '16px 0',
+                            textAlign: 'center',
+                            fontSize: '12px',
+                            color: '#94a3b8',
+                          }}
+                        >
+                          No sites matching "{searchQuery}"
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
+
           <span
             style={{
               fontSize: '11px',
               color: '#64748b',
               fontWeight: 600,
               backgroundColor: '#e2e8f0',
-              padding: '3px 9px',
+              padding: '4px 10px',
               borderRadius: '6px',
+              whiteSpace: 'nowrap',
             }}
           >
-            {selectedSiteIds.length} of {sites.length} selected
+            {selectedSiteIds.length} of 3 selected
           </span>
         </div>
 
