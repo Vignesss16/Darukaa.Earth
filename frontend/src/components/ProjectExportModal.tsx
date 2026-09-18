@@ -29,6 +29,7 @@ export const ProjectExportModal: React.FC<ProjectExportModalProps> = ({
     if (isOpen && project?.id) {
       fetchSummary();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, project?.id]);
 
   const fetchSummary = async () => {

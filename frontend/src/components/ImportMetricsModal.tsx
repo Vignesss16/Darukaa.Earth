@@ -325,6 +325,7 @@ export const ImportMetricsModal: React.FC<ImportMetricsModalProps> = ({
     });
 
     return { validRecords: valid, invalidRowErrors: errors };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     headers,
     rawRows,

@@ -310,7 +310,9 @@ export const MapView: React.FC<MapViewProps> = ({
     let geom: GeoJSONGeometry | null = null;
     if (typeof siteToZoom.geojson === 'string') {
       try {
-        geom = JSON.parse(siteToZoom.geojson as unknown as string) as GeoJSONGeometry;
+        geom = JSON.parse(
+          siteToZoom.geojson as unknown as string
+        ) as GeoJSONGeometry;
       } catch {
         geom = null;
       }
@@ -422,7 +424,9 @@ export const MapView: React.FC<MapViewProps> = ({
           let geom: GeoJSONGeometry | null = null;
           if (typeof site.geojson === 'string') {
             try {
-              geom = JSON.parse(site.geojson as unknown as string) as GeoJSONGeometry;
+              geom = JSON.parse(
+                site.geojson as unknown as string
+              ) as GeoJSONGeometry;
             } catch {
               geom = null;
             }
@@ -723,6 +727,7 @@ export const MapView: React.FC<MapViewProps> = ({
       map.remove();
       mapRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update layers whenever sites, selectedSite, or searchQuery change
@@ -774,7 +779,9 @@ export const MapView: React.FC<MapViewProps> = ({
       let geom: GeoJSONGeometry | null = null;
       if (typeof site.geojson === 'string') {
         try {
-          geom = JSON.parse(site.geojson as unknown as string) as GeoJSONGeometry;
+          geom = JSON.parse(
+            site.geojson as unknown as string
+          ) as GeoJSONGeometry;
         } catch {
           geom = null;
         }

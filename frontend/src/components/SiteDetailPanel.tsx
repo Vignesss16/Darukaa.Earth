@@ -161,6 +161,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
         },
       ]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.id]);
 
   useEffect(() => {

@@ -48,6 +48,7 @@ export const SiteCompareModal: React.FC<SiteCompareModalProps> = ({
     if (isOpen && selectedSiteIds.length >= 2) {
       fetchComparison();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedSiteIds]);
 
   const fetchComparison = async () => {
