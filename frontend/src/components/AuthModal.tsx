@@ -18,7 +18,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('admin@darukaa.earth');
-  const [password, setPassword] = useState('Password123!');
+  const [password, setPassword] = useState('admin123');
   const [fullName, setFullName] = useState('Operations Admin');
   const [role, setRole] = useState<UserRole>('admin');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,20 +47,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     switch (presetRole) {
       case 'admin':
         setEmail('admin@darukaa.earth');
-        setPassword('Password123!');
+        setPassword('admin123');
         setFullName('Operations Admin');
         setRole('admin');
         break;
       case 'analyst':
         setEmail('analyst@darukaa.earth');
-        setPassword('Password123!');
+        setPassword('analyst123');
         setFullName('Field Analyst');
         setRole('analyst');
         break;
       case 'viewer':
         setEmail('viewer@darukaa.earth');
-        setPassword('Password123!');
-        setFullName('Read Only Auditor');
+        setPassword('viewer123');
+        setFullName('Stakeholder Viewer');
         setRole('viewer');
         break;
     }
