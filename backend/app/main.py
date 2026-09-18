@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.database import Base, engine
 from app.routers import activity, auth, metrics, projects, sites
 from app.seed import seed_initial_data
@@ -28,17 +29,10 @@ This API powers the internal operations console for carbon and biodiversity site
     redoc_url="/redoc",
 )
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
-# Enable CORS for local dev & production frontend
+# Enable CORS for local dev & production frontend (configurable via ALLOWED_ORIGINS env var)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
