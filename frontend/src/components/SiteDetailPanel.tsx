@@ -1045,14 +1045,22 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                     promptText
                   );
 
-                const userRequestedExport =
+                const hasInlinePDFButton =
                   !isUser &&
-                  /(pdf|dossier|export|download\s*report)/i.test(promptText);
+                  (/[\u201c"']PDF Report[\u201d"'](?:\s+button)?/i.test(
+                    msg.text
+                  ) ||
+                    /\[.*?\]\(.*?\)/i.test(msg.text));
+
+                const showExportWidget =
+                  !isUser &&
+                  /(pdf|dossier|export|download\s*report)/i.test(promptText) &&
+                  !hasInlinePDFButton;
 
                 const hasWidgets =
                   userRequestedChart ||
                   userRequestedAnalysis ||
-                  userRequestedExport;
+                  showExportWidget;
 
                 return (
                   <div
@@ -1306,7 +1314,7 @@ export const SiteDetailPanel: React.FC<SiteDetailPanelProps> = ({
                       </div>
                     )}
 
-                    {userRequestedExport && (
+                    {showExportWidget && (
                       <div style={{ marginTop: '10px' }}>
                         <button
                           type="button"
