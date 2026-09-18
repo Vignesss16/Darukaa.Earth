@@ -38,20 +38,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const totalSites = sites.length;
   const totalProjects = projects.length;
 
-  // Approximate total area in hectares (mock calculated based on polygon complexity)
+  // Real total area from backend's area_hectares field
   const totalHectares = sites.reduce((acc, s) => {
-    const vertexCount = s.geojson?.coordinates?.[0]?.length || 4;
-    return acc + Math.round(vertexCount * 42.5);
+    return acc + (s.area_hectares || 0);
   }, 0);
 
   // Ecosystem type counts matching SiteType: 'carbon' | 'biodiversity' | 'mixed'
   const carbonCount = sites.filter((s) => s.site_type === 'carbon').length;
-  const biodiversityCount = sites.filter((s) => s.site_type === 'biodiversity').length;
+  const biodiversityCount = sites.filter(
+    (s) => s.site_type === 'biodiversity'
+  ).length;
   const mixedCount = sites.filter((s) => s.site_type === 'mixed').length;
 
   // Sites with recent alerts
   const alertSites = sites.filter(
-    (s) => s.name.toLowerCase().includes('3') || s.name.toLowerCase().includes('alert')
+    (s) =>
+      s.name.toLowerCase().includes('3') ||
+      s.name.toLowerCase().includes('alert')
   );
 
   return (
@@ -73,11 +76,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }}
       >
         <div>
-          <h1 style={{ fontSize: '20px', color: 'var(--color-ink)', fontWeight: 700 }}>
+          <h1
+            style={{
+              fontSize: '20px',
+              color: 'var(--color-ink)',
+              fontWeight: 700,
+            }}
+          >
             Executive Operations Console
           </h1>
-          <p style={{ fontSize: '12px', color: 'var(--color-ink-muted)', marginTop: '2px' }}>
-            Planetary intelligence and degradation telemetry across carbon & biodiversity projects.
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--color-ink-muted)',
+              marginTop: '2px',
+            }}
+          >
+            Planetary intelligence and degradation telemetry across carbon &
+            biodiversity projects.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -98,7 +114,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }}
       >
         {/* Metric 1: Total Hectares */}
-        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
+        <div
+          className="card-container"
+          style={{
+            padding: '16px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e0e3e5',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -107,17 +132,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               marginBottom: '10px',
             }}
           >
-            <span style={{ fontSize: '11px', color: 'var(--color-ink-muted)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-ink-muted)',
+                fontWeight: 600,
+              }}
+            >
               MONITORED SURFACE AREA
             </span>
             <Globe size={16} color="var(--color-teal)" />
           </div>
           <div
             className="font-mono"
-            style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-ink)' }}
+            style={{
+              fontSize: '24px',
+              fontWeight: 600,
+              color: 'var(--color-ink)',
+            }}
           >
             {totalHectares.toLocaleString()}{' '}
-            <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--color-ink-muted)' }}>
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 400,
+                color: 'var(--color-ink-muted)',
+              }}
+            >
               ha
             </span>
           </div>
@@ -133,12 +174,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="badge badge-emerald">
               <TrendingUp size={10} /> +14.2% YoY
             </span>
-            <span style={{ color: 'var(--color-ink-muted)' }}>across {totalProjects} active projects</span>
+            <span style={{ color: 'var(--color-ink-muted)' }}>
+              across {totalProjects} active projects
+            </span>
           </div>
         </div>
 
         {/* Metric 2: Active Conservation Sites */}
-        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
+        <div
+          className="card-container"
+          style={{
+            padding: '16px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e0e3e5',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -147,17 +199,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               marginBottom: '10px',
             }}
           >
-            <span style={{ fontSize: '11px', color: 'var(--color-ink-muted)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-ink-muted)',
+                fontWeight: 600,
+              }}
+            >
               ACTIVE CONSERVATION SITES
             </span>
             <TreeDeciduous size={16} color="var(--color-canopy)" />
           </div>
           <div
             className="font-mono"
-            style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-ink)' }}
+            style={{
+              fontSize: '24px',
+              fontWeight: 600,
+              color: 'var(--color-ink)',
+            }}
           >
             {totalSites}{' '}
-            <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--color-ink-muted)' }}>
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 400,
+                color: 'var(--color-ink-muted)',
+              }}
+            >
               polygons
             </span>
           </div>
@@ -171,12 +239,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             }}
           >
             <span className="badge badge-moss">{carbonCount} Carbon</span>
-            <span className="badge badge-teal">{biodiversityCount} Biodiversity</span>
+            <span className="badge badge-teal">
+              {biodiversityCount} Biodiversity
+            </span>
           </div>
         </div>
 
         {/* Metric 3: Avg Canopy Health */}
-        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
+        <div
+          className="card-container"
+          style={{
+            padding: '16px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e0e3e5',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -185,17 +264,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               marginBottom: '10px',
             }}
           >
-            <span style={{ fontSize: '11px', color: 'var(--color-ink-muted)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-ink-muted)',
+                fontWeight: 600,
+              }}
+            >
               AVG CANOPY COVER INDEX
             </span>
             <CheckCircle2 size={16} color="#047857" />
           </div>
           <div
             className="font-mono"
-            style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-ink)' }}
+            style={{
+              fontSize: '24px',
+              fontWeight: 600,
+              color: 'var(--color-ink)',
+            }}
           >
             74.8%{' '}
-            <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--color-ink-muted)' }}>
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 400,
+                color: 'var(--color-ink-muted)',
+              }}
+            >
               NDVI baseline
             </span>
           </div>
@@ -209,12 +304,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             }}
           >
             <span className="badge badge-emerald">Optimal Health</span>
-            <span style={{ color: 'var(--color-ink-muted)' }}>Sentinel-2 imagery</span>
+            <span style={{ color: 'var(--color-ink-muted)' }}>
+              Sentinel-2 imagery
+            </span>
           </div>
         </div>
 
         {/* Metric 4: Degradation Alerts */}
-        <div className="card-container" style={{ padding: '16px', backgroundColor: '#ffffff', border: '1px solid #e0e3e5', borderRadius: '12px', boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)' }}>
+        <div
+          className="card-container"
+          style={{
+            padding: '16px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e0e3e5',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgba(15, 23, 42, 0.05)',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -223,17 +329,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               marginBottom: '10px',
             }}
           >
-            <span style={{ fontSize: '11px', color: 'var(--color-ink-muted)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-ink-muted)',
+                fontWeight: 600,
+              }}
+            >
               DEGRADATION RISK ALERTS
             </span>
             <AlertTriangle size={16} color="var(--color-clay)" />
           </div>
           <div
             className="font-mono"
-            style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-clay)' }}
+            style={{
+              fontSize: '24px',
+              fontWeight: 600,
+              color: 'var(--color-clay)',
+            }}
           >
             {alertSites.length > 0 ? alertSites.length : 1}{' '}
-            <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--color-ink-muted)' }}>
+            <span
+              style={{
+                fontSize: '13px',
+                fontWeight: 400,
+                color: 'var(--color-ink-muted)',
+              }}
+            >
               flagged
             </span>
           </div>
@@ -273,7 +395,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               backgroundColor: '#FAFAFA',
             }}
           >
-            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-ink)' }}>
+            <h2
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'var(--color-ink)',
+              }}
+            >
               Active Geospatial Sites ({filteredSites.length})
             </h2>
             <button
@@ -286,7 +414,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                textAlign: 'left',
+              }}
+            >
               <thead>
                 <tr
                   className="font-mono"
@@ -319,14 +453,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         fontSize: '13px',
                       }}
                     >
-                      No active sites match your search query. Draw a new polygon site on the map to begin.
+                      No active sites match your search query. Draw a new
+                      polygon site on the map to begin.
                     </td>
                   </tr>
                 ) : (
                   filteredSites.map((site) => {
-                    const project = projects.find((p) => p.id === site.project_id);
-                    const vertexCount = site.geojson?.coordinates?.[0]?.length || 4;
-                    const ha = Math.round(vertexCount * 42.5);
+                    const project = projects.find(
+                      (p) => p.id === site.project_id
+                    );
+                    const ha = site.area_hectares || 0;
 
                     return (
                       <tr
@@ -335,10 +471,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           borderBottom: '1px solid var(--color-line)',
                           transition: 'background-color 0.12s ease',
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F8FAFC')}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = '#F8FAFC')
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            'transparent')
+                        }
                       >
-                        <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--color-ink)' }}>
+                        <td
+                          style={{
+                            padding: '10px 14px',
+                            fontWeight: 600,
+                            color: 'var(--color-ink)',
+                          }}
+                        >
                           {site.name}
                         </td>
                         <td style={{ padding: '10px 14px' }}>
@@ -347,19 +494,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                               site.site_type === 'carbon'
                                 ? 'badge-moss'
                                 : site.site_type === 'biodiversity'
-                                ? 'badge-teal'
-                                : 'badge-neutral'
+                                  ? 'badge-teal'
+                                  : 'badge-neutral'
                             }`}
                           >
                             {site.site_type}
                           </span>
                         </td>
-                        <td style={{ padding: '10px 14px', color: 'var(--color-ink-muted)', fontSize: '12px' }}>
-                          {project ? project.name : `Project #${site.project_id}`}
+                        <td
+                          style={{
+                            padding: '10px 14px',
+                            color: 'var(--color-ink-muted)',
+                            fontSize: '12px',
+                          }}
+                        >
+                          {project
+                            ? project.name
+                            : `Project #${site.project_id}`}
                         </td>
                         <td
                           className="font-mono"
-                          style={{ padding: '10px 14px', fontSize: '12px', fontWeight: 500 }}
+                          style={{
+                            padding: '10px 14px',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                          }}
                         >
                           {ha.toLocaleString()} ha
                         </td>
@@ -367,7 +526,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           <button
                             onClick={() => onSelectSiteOnMap(site)}
                             className="btn-secondary"
-                            style={{ height: '26px', fontSize: '11px', padding: '0 8px' }}
+                            style={{
+                              height: '26px',
+                              fontSize: '11px',
+                              padding: '0 8px',
+                            }}
                           >
                             Inspect on Map
                           </button>
@@ -409,8 +572,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
               >
                 <span style={{ fontWeight: 500 }}>Carbon Offset Sites</span>
-                <span className="font-mono" style={{ color: 'var(--color-ink-muted)' }}>
-                  {totalSites ? Math.round((carbonCount / totalSites) * 100) : 0}%
+                <span
+                  className="font-mono"
+                  style={{ color: 'var(--color-ink-muted)' }}
+                >
+                  {totalSites
+                    ? Math.round((carbonCount / totalSites) * 100)
+                    : 0}
+                  %
                 </span>
               </div>
               <div
@@ -442,8 +611,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
               >
                 <span style={{ fontWeight: 500 }}>Biodiversity Reserves</span>
-                <span className="font-mono" style={{ color: 'var(--color-ink-muted)' }}>
-                  {totalSites ? Math.round((biodiversityCount / totalSites) * 100) : 0}%
+                <span
+                  className="font-mono"
+                  style={{ color: 'var(--color-ink-muted)' }}
+                >
+                  {totalSites
+                    ? Math.round((biodiversityCount / totalSites) * 100)
+                    : 0}
+                  %
                 </span>
               </div>
               <div
@@ -475,8 +650,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
               >
                 <span style={{ fontWeight: 500 }}>Mixed Conservation</span>
-                <span className="font-mono" style={{ color: 'var(--color-ink-muted)' }}>
-                  {totalSites ? Math.round((mixedCount / totalSites) * 100) : 0}%
+                <span
+                  className="font-mono"
+                  style={{ color: 'var(--color-ink-muted)' }}
+                >
+                  {totalSites ? Math.round((mixedCount / totalSites) * 100) : 0}
+                  %
                 </span>
               </div>
               <div
@@ -491,7 +670,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   style={{
                     height: '100%',
                     width: `${totalSites ? (mixedCount / totalSites) * 100 : 0}%`,
-                    backgroundColor: 'var(--color-moss)',
+                    backgroundColor: '#3d8b6f',
                   }}
                 />
               </div>
@@ -521,8 +700,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Globe size={15} color="var(--color-teal)" />
               Sentinel-2 L2A Telemetry Feed
             </div>
-            <p style={{ fontSize: '11px', color: 'var(--color-ink-muted)', lineHeight: '1.4' }}>
-              Multi-spectral 10m resolution bands updated every 5 days. Degradation detection triggers automated audit logs on canopy loss exceeding 10%.
+            <p
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-ink-muted)',
+                lineHeight: '1.4',
+              }}
+            >
+              Multi-spectral 10m resolution bands updated every 5 days.
+              Degradation detection triggers automated audit logs on canopy loss
+              exceeding 10%.
             </p>
           </div>
         </div>
@@ -530,4 +717,3 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     </div>
   );
 };
-
